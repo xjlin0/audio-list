@@ -1,7 +1,7 @@
 === Plugin Name ===
-Contributors: (this should be a list of wordpress.org userid's)
+Contributors: xjlin0
 Donate link: https://xjlin0.github.io/
-Tags: comments, spam
+Tags: audio, player
 Requires at least: 3.0.1
 Tested up to: 3.4
 Stable tag: 4.3
@@ -88,27 +88,27 @@ You may provide arbitrary sections, in the same format as the ones above.  This 
 plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
 "installation."  Arbitrary sections will be shown below the built-in sections outlined above.
 
-== A brief Markdown Example ==
+== local development using Wordpress in docker-compose and mysql in host ==
 
-Ordered list:
+While [Wazoo's docker-compose](https://youtu.be/gEceSAJI_3s) is great with everything in docker-compose, here is yet another docker-compose.yml if you'd like to develop Wordpress plug-in in docker-compose with mysql in host.  Just `docker-compose up` and you will see `wp-content` folder shows up in the folder of docker-compose.yml.
 
-1. Some feature
-1. Another feature
-1. Something else about the plugin
+```yaml
+version: "3.8"
 
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Here's a link to [WordPress](http://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
-Titles are optional, naturally.
-
-[markdown syntax]: http://daringfireball.net/projects/markdown/syntax
-            "Markdown is what the parser uses to process much of the readme file"
-
-Markdown uses email style notation for blockquotes and I've been told:
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-`<?php code(); // goes in backticks ?>`
+services:
+  wordpress:
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: wordpress:6.2.2-apache
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    environment:
+      # WORDPRESS_DEBUG: 1
+      WORDPRESS_DB_HOST: host.docker.internal:3306
+      WORDPRESS_DB_USER: host_mysql_user_name
+      WORDPRESS_DB_PASSWORD: 'host mysql password or empty string with quotes'
+      WORDPRESS_DB_NAME: host_mysql_database_name
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+```
