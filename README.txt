@@ -99,7 +99,7 @@ services:
   wordpress:
     extra_hosts:
       - host.docker.internal:host-gateway
-    image: wordpress:6.2.2-apache
+    image: wordpress:6.5.3-apache
     restart: unless-stopped
     ports:
       - "8888:80"
