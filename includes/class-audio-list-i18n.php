@@ -9,8 +9,8 @@
  * @link       https://xjlin0.github.io
  * @since      1.0.0
  *
- * @package    Audio_Album
- * @subpackage Audio_Album/includes
+ * @package    Audio_List
+ * @subpackage Audio_List/includes
  */
 
 /**
@@ -20,11 +20,11 @@
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    Audio_Album
- * @subpackage Audio_Album/includes
+ * @package    Audio_List
+ * @subpackage Audio_List/includes
  * @author     Jack Lin <xjlin0@gmail.com>
  */
-class Audio_Album_i18n {
+class Audio_List_i18n {
 
 
 	/**
@@ -35,7 +35,7 @@ class Audio_Album_i18n {
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'audio-album',
+			'audio-list',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);

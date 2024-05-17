@@ -22,7 +22,7 @@
  * @link       https://xjlin0.github.io
  * @since      1.0.0
  *
- * @package    Audio_Album
+ * @package    Audio_List
  */
 
 // If uninstall not called from WordPress, then exit.

@@ -6,8 +6,8 @@
  * @link       https://xjlin0.github.io
  * @since      1.0.0
  *
- * @package    Audio_Album
- * @subpackage Audio_Album/includes
+ * @package    Audio_List
+ * @subpackage Audio_List/includes
  */
 
 /**
@@ -16,11 +16,11 @@
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.0
- * @package    Audio_Album
- * @subpackage Audio_Album/includes
+ * @package    Audio_List
+ * @subpackage Audio_List/includes
  * @author     Jack Lin <xjlin0@gmail.com>
  */
-class Audio_Album_Deactivator {
+class Audio_List_Deactivator {
 
 	/**
 	 * Short Description. (use period)

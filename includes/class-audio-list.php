@@ -9,8 +9,8 @@
  * @link       https://xjlin0.github.io
  * @since      1.0.0
  *
- * @package    Audio_Album
- * @subpackage Audio_Album/includes
+ * @package    Audio_List
+ * @subpackage Audio_List/includes
  */
 
 /**
@@ -23,11 +23,11 @@
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Audio_Album
- * @subpackage Audio_Album/includes
+ * @package    Audio_List
+ * @subpackage Audio_List/includes
  * @author     Jack Lin <xjlin0@gmail.com>
  */
-class Audio_Album {
+class Audio_List {
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -35,7 +35,7 @@ class Audio_Album {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      Audio_Album_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      Audio_List_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -67,12 +67,12 @@ class Audio_Album {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'AUDIO_ALBUM_VERSION' ) ) {
-			$this->version = AUDIO_ALBUM_VERSION;
+		if ( defined( 'AUDIO_LIST_VERSION' ) ) {
+			$this->version = AUDIO_LIST_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'audio-album';
+		$this->plugin_name = 'audio-list';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -86,10 +86,10 @@ class Audio_Album {
 	 *
 	 * Include the following files that make up the plugin:
 	 *
-	 * - Audio_Album_Loader. Orchestrates the hooks of the plugin.
-	 * - Audio_Album_i18n. Defines internationalization functionality.
-	 * - Audio_Album_Admin. Defines all hooks for the admin area.
-	 * - Audio_Album_Public. Defines all hooks for the public side of the site.
+	 * - Audio_List_Loader. Orchestrates the hooks of the plugin.
+	 * - Audio_List_i18n. Defines internationalization functionality.
+	 * - Audio_List_Admin. Defines all hooks for the admin area.
+	 * - Audio_List_Public. Defines all hooks for the public side of the site.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
@@ -103,33 +103,33 @@ class Audio_Album {
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-audio-album-loader.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-audio-list-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-audio-album-i18n.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-audio-list-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-audio-album-admin.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-audio-list-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-audio-album-public.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-audio-list-public.php';
 
-		$this->loader = new Audio_Album_Loader();
+		$this->loader = new Audio_List_Loader();
 
 	}
 
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
-	 * Uses the Audio_Album_i18n class in order to set the domain and to register the hook
+	 * Uses the Audio_List_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
 	 * @since    1.0.0
@@ -137,7 +137,7 @@ class Audio_Album {
 	 */
 	private function set_locale() {
 
-		$plugin_i18n = new Audio_Album_i18n();
+		$plugin_i18n = new Audio_List_i18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 
@@ -152,7 +152,7 @@ class Audio_Album {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Audio_Album_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Audio_List_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -168,7 +168,7 @@ class Audio_Album {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Audio_Album_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Audio_List_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
@@ -199,7 +199,7 @@ class Audio_Album {
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
 	 * @since     1.0.0
-	 * @return    Audio_Album_Loader    Orchestrates the hooks of the plugin.
+	 * @return    Audio_List_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
 		return $this->loader;

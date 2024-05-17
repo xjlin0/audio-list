@@ -10,18 +10,18 @@
  *
  * @link              https://xjlin0.github.io
  * @since             1.0.0
- * @package           Audio_Album
+ * @package           Audio_List
  *
  * @wordpress-plugin
- * Plugin Name:       Audio album
- * Plugin URI:        https://github.com/xjlin0/audio-album
- * Description:       A Wordpress plug-in for showing players for audio files in the remote folders, based on Dennis's code.
+ * Plugin Name:       Audio list
+ * Plugin URI:        https://github.com/xjlin0/audio-list
+ * Description:       A Wordpress plug-in for showing players for audio files in the remote folders, based on Dennis's code. (Audio files meta info stored in local database)
  * Version:           1.0.0
  * Author:            Jack Lin
  * Author URI:        https://xjlin0.github.io/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       audio-album
+ * Text Domain:       audio-list
  * Domain Path:       /languages
  */
 
@@ -35,34 +35,34 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'AUDIO_ALBUM_VERSION', '1.0.0' );
+define( 'AUDIO_LIST_VERSION', '1.0.0' );
 
 /**
  * The code that runs during plugin activation.
- * This action is documented in includes/class-audio-album-activator.php
+ * This action is documented in includes/class-audio-list-activator.php
  */
-function activate_audio_album() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-audio-album-activator.php';
-	Audio_Album_Activator::activate();
+function activate_audio_list() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-audio-list-activator.php';
+	Audio_List_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/class-audio-album-deactivator.php
+ * This action is documented in includes/class-audio-list-deactivator.php
  */
-function deactivate_audio_album() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-audio-album-deactivator.php';
-	Audio_Album_Deactivator::deactivate();
+function deactivate_audio_list() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-audio-list-deactivator.php';
+	Audio_List_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_audio_album' );
-register_deactivation_hook( __FILE__, 'deactivate_audio_album' );
+register_activation_hook( __FILE__, 'activate_audio_list' );
+register_deactivation_hook( __FILE__, 'deactivate_audio_list' );
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-audio-album.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-audio-list.php';
 
 /**
  * Begins execution of the plugin.
@@ -73,10 +73,10 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-audio-album.php';
  *
  * @since    1.0.0
  */
-function run_audio_album() {
+function run_audio_list() {
 
-	$plugin = new Audio_Album();
+	$plugin = new Audio_List();
 	$plugin->run();
 
 }
-run_audio_album();
+run_audio_list();
