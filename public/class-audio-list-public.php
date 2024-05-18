@@ -48,10 +48,74 @@ class Audio_List_Public {
 	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
-
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+    add_shortcode('audio-list', array($this, 'display_audio_list'));
+	}
 
+
+	public function display_audio_list($atts) {
+	    global $wpdb;
+	    $atts = shortcode_atts(array(
+	        'sermondate' => '',
+	        'type' => '',
+	        'url' => '',
+	        'style' => '',
+	        'id' => ''
+	    ), $atts);
+
+	    $sermondate = isset($atts['sermondate']) ? sanitize_text_field($atts['sermondate']) : '';
+      $type = isset($atts['type']) ? sanitize_text_field($atts['type']) : '';
+      $url = isset($atts['url']) ? sanitize_text_field($atts['url']) : '';
+      $style = isset($atts['style']) ? sanitize_text_field($atts['style']) : '';
+      $id = isset($atts['id']) ? sanitize_text_field($atts['id']) : '';
+
+	    $table_name = $wpdb->prefix . 'audio_list';
+		  $where_conditions = array('activeFlag = "Active"');
+	    $query_params = array();
+
+	    if (!empty($sermondate)) {
+	        $where_conditions[] = "sermondate LIKE %s";
+	        $query_params[] = $sermondate;
+	    }
+
+	    if (!empty($type)) {
+	        $where_conditions[] = "type = %s";
+	        $query_params[] = $type;
+	    }
+
+	    $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
+
+	    $query = $wpdb->prepare("SELECT * FROM $table_name $where_clause ORDER BY sermondate ASC LIMIT 2000", $query_params);
+
+	    $results = $wpdb->get_results($query);
+
+	    $output = '<ul>';
+	    foreach ($results as $result) {
+	    	  $section = empty($result->section) ? '<br/>' . $result->type . '<br/>' : '<br/>'.$result->type. ': <span>'. $result->section .'</span><br/>' ;
+	    	  $src = $url . $result->audiofile;
+          $filenames = explode('.', $result->audiofile);
+          $filename = array_shift($filenames);
+          $audio_id = $id . $filename;
+
+          $output .= <<<EOD
+					<p>
+					  <a id="$audio_id"></a>
+					</p>
+					<li>
+					  $result->sermondate &nbsp; $result->topic
+					  $section
+					  $result->speaker
+					  <br/>
+						<audio style="$style" preload="none" controls>
+						  <source src="$src" type="audio/mpeg">
+						  Your browser doesn't support the audio.
+						</audio>
+					</li>
+					EOD;
+	    }
+	    $output .= '</ul>';
+	    return $output;
 	}
 
 	/**
