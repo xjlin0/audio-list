@@ -48,7 +48,7 @@ class Audio_List_Activator {
         `audiofile` varchar(255) COLLATE $collate DEFAULT NULL,
         `bibleID` int(11) DEFAULT '0',
         `updatedBy` varchar(255) COLLATE $collate DEFAULT NULL,
-        `updatedTime` datetime DEFAULT NULL,
+        `updatedTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `activeFlag` varchar(45) COLLATE $collate DEFAULT 'Active',
         PRIMARY KEY (`id`),
         KEY `idx_sermondate` (`sermondate`),
