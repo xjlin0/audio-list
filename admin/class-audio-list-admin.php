@@ -48,10 +48,40 @@ class Audio_List_Admin {
 	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
-
+    error_log("Debug: class-audio-list-admin.php 51 running __construct()");
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+    add_action('admin_menu', array($this, 'add_plugin_menu_pages'));
+    add_action('admin_post_audio_list_form_submit', array($this, 'process_audio_list_form_submission'));
+    add_action('init', array($this, 'custom_rewrite_rules'));
+	}
 
+
+	public function add_plugin_menu_pages() {
+	    error_log("Debug: class-audio-list-admin.php 60 running add_plugin_menu_pages()");
+		  add_menu_page('Audio List', 'Audio List', 'manage_options', 'audio-list-admin', array($this, 'audio_list_admin_page'));
+	}
+
+	public function audio_list_admin_page() {   // Handle rendering of admin page here
+		  error_log("Debug: class-audio-list-admin.php 65 running audio_list_admin_page()");
+	    ?>
+	    <div class="wrap">
+	        <h1>Audio List</h1>
+	        <button onclick="location.href='<?php echo admin_url('admin-post.php?action=create_audio'); ?>'">Create</button>
+	        <button onclick="location.href='<?php echo admin_url('admin-post.php?action=select_audio'); ?>'">Select/Update</button>
+		      <button onclick="location.href='<?php echo admin_url('admin.php?page=audio-list-logout-page'); ?>'">Logout</button>
+	    </div>
+	    <?php
+	}
+
+	public function custom_rewrite_rules() {
+	    add_rewrite_rule('^audio-list-logout-page/?', 'index.php?custom_logout_page=true', 'top');
+	}
+
+
+	// Form submission handlers
+	public function process_audio_list_form_submission() {  // Handle form submissions here
+		  error_log("Debug: class-audio-list-admin.php 78 running process_audio_list_form_submission()");
 	}
 
 	/**
