@@ -79,45 +79,47 @@ class Audio_List_Admin {
 
     public function custom_audio_list_page() {
         // Retrieve previously submitted values, if available
-        $sermondate_value = isset($_POST['sermondate']) ? $_POST['sermondate'] : '';
+        $sermondate_value = isset($_POST['sermondate']) ? $_POST['sermondate'] : date('Y-m-d');
         $speaker_value = isset($_POST['speaker']) ? $_POST['speaker'] : '';
         $topic_value = isset($_POST['topic']) ? $_POST['topic'] : '';
         $section_value = isset($_POST['section']) ? $_POST['section'] : '';
-        $location_value = isset($_POST['location']) ? $_POST['location'] : '';
+        $location_value = isset($_POST['location']) ? $_POST['location'] : '海沃教會';
         $type_value = isset($_POST['type']) ? $_POST['type'] : '';
         $remark_value = isset($_POST['remark']) ? $_POST['remark'] : '';
         $audiofile_value = isset($_POST['audiofile']) ? $_POST['audiofile'] : '';
-        $bibleID_value = isset($_POST['bibleID']) ? $_POST['bibleID'] : '';
+        $bibleID_value = isset($_POST['bibleID']) ? $_POST['bibleID'] : 0;
 
         ?>
         <div class="wrap">
             <h2>Add New Audio</h2>
             <form method="post" action="">
                 <input type="hidden" name="action" value="custom_audio_list_form_submit">
-                <!-- Form fields for data entry -->
+
+                <?php wp_nonce_field( 'my_action', 'csrf_token' ); ?>
+
                 <label for="sermondate">Sermon Date:</label>
                 <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><br>
 
                 <label for="speaker">Speaker:</label>
-                <input type="text" id="speaker" name="speaker" value="<?php echo esc_attr($speaker_value); ?>" required><br>
+                <input type="text" id="speaker" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required><br>
 
                 <label for="topic">Topic:</label>
-                <input type="text" id="topic" name="topic" value="<?php echo esc_attr($topic_value); ?>" required><br>
+                <input type="text" id="topic" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required><br>
 
                 <label for="section">Section:</label>
-                <input type="text" id="section" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
+                <input type="text" id="section" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
 
                 <label for="location">Location:</label>
-                <input type="text" id="location" name="location" value="<?php echo esc_attr($location_value); ?>"><br>
+                <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>"><br>
 
                 <label for="type">Type:</label>
-                <input type="text" id="type" name="type" value="<?php echo esc_attr($type_value); ?>"><br>
+                <input type="text" id="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>"><br>
 
                 <label for="remark">Remark:</label>
-                <input type="text" id="remark" name="remark" value="<?php echo esc_attr($remark_value); ?>"><br>
+                <input type="text" id="remark" maxlength="255" name="remark" value="<?php echo esc_attr($remark_value); ?>"><br>
 
                 <label for="audiofile">Audio file:</label>
-                <input type="text" id="audiofile" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>"><br>
+                <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>"><br>
 
                 <label for="bibleID">Bible ID:</label>
                 <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
@@ -131,8 +133,10 @@ class Audio_List_Admin {
 
     public function process_audio_list_form_submission() {
     	ob_start();
-        if (isset($_POST['submit'])) {
-            // Sanitize input data
+        if (isset($_POST['submit']) && isset( $_POST['csrf_token'] ) && wp_verify_nonce( $_POST['csrf_token'], 'my_action' )) {
+        	  global $wpdb;
+            $current_user = wp_get_current_user();
+
             $sermondate = sanitize_text_field($_POST['sermondate']);
             $speaker = sanitize_text_field($_POST['speaker']);
             $topic = sanitize_text_field($_POST['topic']);
@@ -142,8 +146,6 @@ class Audio_List_Admin {
             $remark = sanitize_text_field($_POST['remark']);
             $audiofile = sanitize_text_field($_POST['audiofile']);
             $bibleID = intval($_POST['bibleID']);
-
-            global $wpdb;
 
             // Insert data into the database
             $result = $wpdb->insert(
@@ -157,20 +159,25 @@ class Audio_List_Admin {
                     'type' => $type,
                     'remark' => $remark,
                     'audiofile' => $audiofile,
-                    'bibleID' => $bibleID
+                    'bibleID' => $bibleID,
+                    'updatedBy' => $current_user->user_login
                 )
             );
 
+            $message = 'Audio List ' . $sermondate . ' ' . $speaker . ' ' . $topic ;
             if ($result) {
                 // Set a transient message to display after redirect
-                set_transient('custom_audio_list_message', 'Audio List added successfully!', 30);
+                set_transient('custom_audio_list_message', $message . ' added successfully!', 30);
                 // Redirect to the plugin root admin URL
                 wp_redirect(admin_url('admin.php?page=audio-list-admin'));
                 exit;
             } else {
                 // Display error message
-                echo '<div class="notice notice-error is-dismissible"><p>Failed to add Audio List. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
+                echo '<div class="notice notice-error is-dismissible"><p>Failed to add '. $message  .'. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
             }
+        } else {
+        	error_log("missing nonce_field for CSRF token verification");
+          echo '<div class="notice notice-error is-dismissible"><p>Security check failed since there is no CSRF token. Please try again.</p></div>';
         }
     }
 
