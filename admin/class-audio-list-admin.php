@@ -22,41 +22,20 @@
  */
 class Audio_List_Admin {
 
-       /**
-        * The ID of this plugin.
-        *
-        * @since    1.0.0
-        * @access   private
-        * @var      string    $plugin_name    The ID of this plugin.
-        */
-       private $plugin_name;
-   
-       /**
-        * The version of this plugin.
-        *
-        * @since    1.0.0
-        * @access   private
-        * @var      string    $version    The current version of this plugin.
-        */
-       private $version;
-   
-       /**
-        * Initialize the class and set its properties.
-        *
-        * @since    1.0.0
-        * @param      string    $plugin_name       The name of this plugin.
-        * @param      string    $version    The version of this plugin.
-        */
-    public function __construct( $plugin_name, $version ) {
+    private $plugin_name;
+    private $version;
+
+    public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
         add_action('admin_menu', array($this, 'add_plugin_menu_pages'));
         add_action('admin_post_custom_audio_list_form_submit', array($this, 'process_audio_list_form_submission'));
+        // Handle form submission before any HTML is output
+        add_action('admin_init', array($this, 'handle_form_submission'));
         add_action('admin_notices', array($this, 'custom_admin_notice'));
     }
 
     public function add_plugin_menu_pages() {
-        // Add main menu item
         add_menu_page(
             'Audio List',
             'Audio List',
@@ -65,7 +44,6 @@ class Audio_List_Admin {
             array($this, 'audio_list_admin_page')
         );
 
-        // Add submenu item under main menu item
         add_submenu_page(
             'audio-list-admin',
             'Add New Audio',
@@ -74,6 +52,12 @@ class Audio_List_Admin {
             'custom-audio-list',
             array($this, 'custom_audio_list_page')
         );
+    }
+
+    public function handle_form_submission() {
+        if (isset($_POST['action']) && $_POST['action'] === 'custom_audio_list_form_submit') {
+            $this->process_audio_list_form_submission();
+        }
     }
 
     public function audio_list_admin_page() {
@@ -94,38 +78,49 @@ class Audio_List_Admin {
     }
 
     public function custom_audio_list_page() {
+        // Retrieve previously submitted values, if available
+        $sermondate_value = isset($_POST['sermondate']) ? $_POST['sermondate'] : '';
+        $speaker_value = isset($_POST['speaker']) ? $_POST['speaker'] : '';
+        $topic_value = isset($_POST['topic']) ? $_POST['topic'] : '';
+        $section_value = isset($_POST['section']) ? $_POST['section'] : '';
+        $location_value = isset($_POST['location']) ? $_POST['location'] : '';
+        $type_value = isset($_POST['type']) ? $_POST['type'] : '';
+        $remark_value = isset($_POST['remark']) ? $_POST['remark'] : '';
+        $audiofile_value = isset($_POST['audiofile']) ? $_POST['audiofile'] : '';
+        $bibleID_value = isset($_POST['bibleID']) ? $_POST['bibleID'] : '';
+
         ?>
         <div class="wrap">
             <h2>Add New Audio</h2>
-            <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
+            <form method="post" action="">
                 <input type="hidden" name="action" value="custom_audio_list_form_submit">
                 <!-- Form fields for data entry -->
                 <label for="sermondate">Sermon Date:</label>
-                <input type="date" id="sermondate" name="sermondate" required><br>
+                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><br>
 
                 <label for="speaker">Speaker:</label>
-                <input type="text" id="speaker" name="speaker" required><br>
+                <input type="text" id="speaker" name="speaker" value="<?php echo esc_attr($speaker_value); ?>" required><br>
 
                 <label for="topic">Topic:</label>
-                <input type="text" id="topic" name="topic" required><br>
+                <input type="text" id="topic" name="topic" value="<?php echo esc_attr($topic_value); ?>" required><br>
 
                 <label for="section">Section:</label>
-                <input type="text" id="section" name="section"><br>
+                <input type="text" id="section" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
 
                 <label for="location">Location:</label>
-                <input type="text" id="location" name="location"><br>
+                <input type="text" id="location" name="location" value="<?php echo esc_attr($location_value); ?>"><br>
 
                 <label for="type">Type:</label>
-                <input type="text" id="type" name="type"><br>
+                <input type="text" id="type" name="type" value="<?php echo esc_attr($type_value); ?>"><br>
 
                 <label for="remark">Remark:</label>
-                <input type="text" id="remark" name="remark"><br>
+                <input type="text" id="remark" name="remark" value="<?php echo esc_attr($remark_value); ?>"><br>
 
                 <label for="audiofile">Audio file:</label>
-                <input type="text" id="audiofile" name="audiofile"><br>
+                <input type="text" id="audiofile" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>"><br>
 
                 <label for="bibleID">Bible ID:</label>
-                <input type="number" id="bibleID" name="bibleID"><br>
+                <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
 
                 <input type="submit" name="submit" value="Submit">
                 <input type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
@@ -135,12 +130,8 @@ class Audio_List_Admin {
     }
 
     public function process_audio_list_form_submission() {
+    	ob_start();
         if (isset($_POST['submit'])) {
-            // Ensure no output before redirect
-            ob_start();
-
-            global $wpdb;
-
             // Sanitize input data
             $sermondate = sanitize_text_field($_POST['sermondate']);
             $speaker = sanitize_text_field($_POST['speaker']);
@@ -152,7 +143,10 @@ class Audio_List_Admin {
             $audiofile = sanitize_text_field($_POST['audiofile']);
             $bibleID = intval($_POST['bibleID']);
 
-            $wpdb->insert(
+            global $wpdb;
+
+            // Insert data into the database
+            $result = $wpdb->insert(
                 'wp_audio_list',
                 array(
                     'sermondate' => $sermondate,
@@ -167,20 +161,25 @@ class Audio_List_Admin {
                 )
             );
 
-            // Set a transient message to display after redirect
-            set_transient('custom_audio_list_message', 'Audio added successfully!', 30);
-
-            // Redirect back to the audio list admin page
-            wp_redirect(admin_url('admin.php?page=audio-list-admin'));
-            exit;
+            if ($result) {
+                // Set a transient message to display after redirect
+                set_transient('custom_audio_list_message', 'Audio List added successfully!', 30);
+                // Redirect to the plugin root admin URL
+                wp_redirect(admin_url('admin.php?page=audio-list-admin'));
+                exit;
+            } else {
+                // Display error message
+                echo '<div class="notice notice-error is-dismissible"><p>Failed to add Audio List. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
+            }
         }
     }
 
     public function custom_admin_notice() {
         // Display admin notice if there's a message set
         if ($message = get_transient('custom_audio_list_message')) {
+            $klass = false !== strpos($message, 'successfully') ? 'notice-success' : 'notice-error';
             ?>
-            <div class="notice notice-success is-dismissible">
+            <div class="notice <?php echo esc_attr($klass); ?> is-dismissible">
                 <p><?php echo $message; ?></p>
             </div>
             <?php
@@ -188,47 +187,11 @@ class Audio_List_Admin {
         }
     }
 
-   /**
-    * Register the stylesheets for the admin area.
-    *
-    * @since    1.0.0
-    */
     public function enqueue_styles() {
-
-    /**
-     * This function is provided for demonstration purposes only.
-     *
-     * An instance of this class should be passed to the run() function
-     * defined in Audio_List_Loader as all of the hooks are defined
-     * in that particular class.
-     *
-     * The Audio_List_Loader will then create the relationship
-     * between the defined hooks and the functions defined in this
-     * class.
-     */
-
         wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/audio-list-admin.css', array(), $this->version, 'all');
     }
 
-    /**
-     * Register the JavaScript for the admin area.
-     *
-     * @since    1.0.0
-     */
     public function enqueue_scripts() {
-
-    /**
-     * This function is provided for demonstration purposes only.
-     *
-     * An instance of this class should be passed to the run() function
-     * defined in Audio_List_Loader as all of the hooks are defined
-     * in that particular class.
-     *
-     * The Audio_List_Loader will then create the relationship
-     * between the defined hooks and the functions defined in this
-     * class.
-     */
-
         wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/audio-list-admin.js', array('jquery'), $this->version, false);
     }
 }
