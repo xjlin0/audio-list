@@ -70,6 +70,8 @@ class Audio_List_Admin {
         ?>
         <div class="wrap">
             <h1>Select Audio to Edit</h1>
+            <button class="button button-secondary" onclick="location.href='<?php echo admin_url('admin.php?page=audio-list-admin'); ?>'">Go Back</button>
+            <br><br>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
