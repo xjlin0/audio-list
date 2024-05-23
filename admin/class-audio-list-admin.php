@@ -52,7 +52,54 @@ class Audio_List_Admin {
             'custom-audio-list',
             array($this, 'custom_audio_list_page')
         );
+
+        add_submenu_page(
+            'audio-list-admin',
+            'Select Audio to Edit',
+            'Update Existing Audio',
+            'manage_options',
+            'select-audio',
+            array($this, 'custom_select_audio_page')
+        );
     }
+
+    public function custom_select_audio_page() {
+        global $wpdb;
+        $audio_list = $wpdb->get_results("SELECT * FROM wp_audio_list ORDER BY sermondate DESC, type, topic");
+
+        ?>
+        <div class="wrap">
+            <h1>Select Audio to Edit</h1>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Speaker</th>
+                        <th>Topic</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($audio_list as $audio) : ?>
+                        <tr>
+                            <td><?php echo esc_html($audio->sermondate); ?></td>
+                            <td><?php echo esc_html($audio->speaker); ?></td>
+                            <td><?php echo esc_html($audio->topic); ?></td>
+                            <td><?php echo esc_html($audio->type); ?></td>
+                            <td><?php echo esc_html($audio->activeFlag); ?></td>
+                            <td>
+                                <a href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Edit</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+    }
+
 
     public function handle_form_submission() {
         if (isset($_POST['action']) && $_POST['action'] === 'custom_audio_list_form_submit') {
@@ -73,7 +120,7 @@ class Audio_List_Admin {
             <?php endif; ?>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=custom-audio-list'); ?>'">1.新增證道錄音資料 (Create sermon record)</button>
             <br><br>
-            <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin-post.php?action=select_audio'); ?>'">2.修改證道錄音資料 (Update sermon record)</button>
+            <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=select-audio'); ?>'">2.修改證道錄音資料 (Update sermon record)</button>
             <br><br>
             <button class="button button-secondary" onclick="location.href='<?php echo wp_logout_url(admin_url()); ?>'">登出系統 Log Out</button>
         </div>
@@ -81,25 +128,48 @@ class Audio_List_Admin {
     }
 
     public function custom_audio_list_page() {
-        $current_user = wp_get_current_user()->user_login;
-        $sermondate_value = isset($_POST['sermondate']) ? $_POST['sermondate'] : date('Y-m-d');
-        $speaker_value = isset($_POST['speaker']) ? $_POST['speaker'] : '';
-        $topic_value = isset($_POST['topic']) ? $_POST['topic'] : '';
-        $section_value = isset($_POST['section']) ? $_POST['section'] : '';
-        $location_value = isset($_POST['location']) ? $_POST['location'] : '海沃教會';
-        $type_value = isset($_POST['type']) ? $_POST['type'] : '';
-        $remark_value = isset($_POST['remark']) ? $_POST['remark'] : '';
-        $audiofile_value = isset($_POST['audiofile']) ? $_POST['audiofile'] : '';
-        $bibleID_value = isset($_POST['bibleID']) ? $_POST['bibleID'] : 0;
+        $audio_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        global $wpdb;
+
+        // Initialize empty values for form fields
+        $sermondate_value = date('Y-m-d');
+        $speaker_value = '';
+        $topic_value = '';
+        $section_value = '';
+        $location_value = '海沃教會';
+        $type_value = '';
+        $remark_value = '';
+        $audiofile_value = '';
+        $bibleID_value = 0;
+
+        // If audio ID is provided, fetch the data from the database
+        if ($audio_id) {
+            $audio = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_audio_list WHERE id = %d", $audio_id));
+            if ($audio) {
+                // Pre-fill form fields with fetched data
+                $sermondate_value = $audio->sermondate;
+                $speaker_value = $audio->speaker;
+                $topic_value = $audio->topic;
+                $section_value = $audio->section;
+                $location_value = $audio->location;
+                $type_value = $audio->type;
+                $remark_value = $audio->remark;
+                $audiofile_value = $audio->audiofile;
+                $bibleID_value = $audio->bibleID;
+            } else {
+                echo 'Audio record not found.';
+                return;
+            }
+        }
 
         ?>
-		        <div class="wrap">
-		            <h1>Create Sermon Record (新增錄音證道)</h1>
-		            <h2>Editor: <?php echo $current_user; ?></h2>
-		            <form method="post" action="">
-		                <input type="hidden" name="action" value="custom_audio_list_form_submit">
+        <div class="wrap">
+            <h1><?php echo $audio_id ? 'Update' : 'Create'; ?> Sermon Record</h1>
+            <form method="post" action="">
+                <input type="hidden" name="action" value="custom_audio_list_form_submit">
+                <?php wp_nonce_field('my_action', 'csrf_token'); ?>
 
-		                <?php wp_nonce_field( 'my_action', 'csrf_token' ); ?>
+                <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
 
 		                <label for="sermondate">日期 (mm/dd/yyyy):	</label>
 		                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><span style="color: red;">*</span><br>
@@ -133,17 +203,46 @@ class Audio_List_Admin {
 		                <label style="vertical-align: top;" for="remark">備註(Remark):	</label>
 		                <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>"></textarea><br>
 
-		                <input class="button button-primary" type="submit" name="submit" value="Submit">
-		                <input class="button button-secondary" type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
-		            </form>
-		        </div>
+                <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
+		            <?php if ($audio_id && $audio->activeFlag == 'Active') : ?>
+		                <input class="button button-secondary" type="submit" name="delete" value="Delete">
+		            <?php endif; ?>
+                <input class="button button-secondary" type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
+            </form>
+        </div>
         <?php
     }
 
     public function process_audio_list_form_submission() {
-    	ob_start();
-        if (isset($_POST['submit']) && isset( $_POST['csrf_token'] ) && wp_verify_nonce( $_POST['csrf_token'], 'my_action' )) {
-        	  global $wpdb;
+        ob_start();
+        if (isset($_POST['csrf_token']) && wp_verify_nonce($_POST['csrf_token'], 'my_action')) {
+          	$current_user = wp_get_current_user();
+		        global $wpdb;
+		        $audio_id = isset($_POST['audio_id']) ? intval($_POST['audio_id']) : 0;
+
+		        if (isset($_POST['delete']) && $audio_id) {
+		            // Perform soft delete (set activeFlag to false)
+		            $result = $wpdb->update(
+		                'wp_audio_list',
+		                array(
+		                	'activeFlag' => 'Inactive',
+		                	'updatedBy' => $current_user->user_login
+		                ),
+		                array('id' => $audio_id)
+		            );
+
+		            if ($result !== false) {
+		                // Set a transient message to display after redirect
+		                set_transient('custom_audio_list_message', 'Audio record deleted.', 30);
+		                // Redirect to the plugin root admin URL
+		                wp_redirect(admin_url('admin.php?page=select-audio'));
+		                exit;
+		            } else {
+		                // Display error message
+		                echo '<div class="notice notice-error is-dismissible"><p>Failed to delete audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
+		                return;
+		            }
+		        }
 
             $sermondate = sanitize_text_field($_POST['sermondate']);
             $speaker = sanitize_text_field($_POST['speaker']);
@@ -155,37 +254,60 @@ class Audio_List_Admin {
             $audiofile = sanitize_text_field($_POST['audiofile']);
             $bibleID = intval($_POST['bibleID']);
 
-            // Insert data into the database
-            $result = $wpdb->insert(
-                'wp_audio_list',
-                array(
-                    'sermondate' => $sermondate,
-                    'speaker' => $speaker,
-                    'topic' => $topic,
-                    'section' => $section,
-                    'location' => $location,
-                    'type' => $type,
-                    'remark' => $remark,
-                    'audiofile' => $audiofile,
-                    'bibleID' => $bibleID,
-                    'updatedBy' => $current_user
-                )
-            );
+            if ($audio_id) {
+                // Update existing audio record
+                $result = $wpdb->update(
+                    'wp_audio_list',
+                    array(
+                        'sermondate' => $sermondate,
+                        'speaker' => $speaker,
+                        'topic' => $topic,
+                        'section' => $section,
+                        'location' => $location,
+                        'type' => $type,
+                        'remark' => $remark,
+                        'audiofile' => $audiofile,
+                        'bibleID' => $bibleID,
+                        'updatedBy' => $current_user->user_login
+                    ),
+                    array('id' => $audio_id)
+                );
 
-            $message = 'Audio List ' . $sermondate . ' ' . $speaker . ' ' . $topic ;
-            if ($result) {
+                $message = 'Audio List ' . $sermondate . ' ' . $speaker . ' ' . $topic . ' updated.';
+            } else {
+                // Insert new audio record
+                $result = $wpdb->insert(
+                    'wp_audio_list',
+                    array(
+                        'sermondate' => $sermondate,
+                        'speaker' => $speaker,
+                        'topic' => $topic,
+                        'section' => $section,
+                        'location' => $location,
+                        'type' => $type,
+                        'remark' => $remark,
+                        'audiofile' => $audiofile,
+                        'bibleID' => $bibleID,
+                        'updatedBy' => $current_user->user_login
+                    )
+                );
+
+                $message = 'Audio List ' . $sermondate . ' ' . $speaker . ' ' . $topic . ' added.';
+            }
+
+            if ($result !== false) {
                 // Set a transient message to display after redirect
-                set_transient('custom_audio_list_message', $message . ' added successfully!', 30);
+                set_transient('custom_audio_list_message', $message, 30);
                 // Redirect to the plugin root admin URL
                 wp_redirect(admin_url('admin.php?page=audio-list-admin'));
                 exit;
             } else {
                 // Display error message
-                echo '<div class="notice notice-error is-dismissible"><p>Failed to add '. $message  .'. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
+                echo '<div class="notice notice-error is-dismissible"><p>Failed to ' . ($audio_id ? 'update' : 'add') . ' audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
             }
         } else {
-        	error_log("missing nonce_field for CSRF token verification");
-          echo '<div class="notice notice-error is-dismissible"><p>Security check failed since there is no CSRF token. Please try again.</p></div>';
+            error_log("missing nonce_field for CSRF token verification");
+            echo '<div class="notice notice-error is-dismissible"><p>Security check failed since there is no CSRF token. Please try again.</p></div>';
         }
     }
 
