@@ -171,42 +171,42 @@ class Audio_List_Admin {
 
                 <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
 
-		                <label for="sermondate">日期 (mm/dd/yyyy):	</label>
-		                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><span style="color: red;">*</span><br>
+                <label for="sermondate">日期 (mm/dd/yyyy):	</label>
+                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><span style="color: red;">*</span><br>
 
-		                <label for="speaker">講員(Speaker):	</label>
-		                <input type="text" id="speaker" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required><span style="color: red;">*</span><br>
+                <label for="speaker">講員(Speaker):	</label>
+                <input type="text" id="speaker" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required><span style="color: red;">*</span><br>
 
-		                <label for="topic">主題(Topic):	</label>
-		                <input type="text" id="topic" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required><span style="color: red;">*</span><br>
+                <label for="topic">主題(Topic):	</label>
+                <input type="text" id="topic" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required><span style="color: red;">*</span><br>
 
-		                <label for="section">經節(Section):	</label>
-		                <input type="text" id="section" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
+                <label for="section">經節(Section):	</label>
+                <input type="text" id="section" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
 
-		                <label for="bibleID">Bible ID:</label>
-		                <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
+                <label for="bibleID">Bible ID:</label>
+                <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
 
-		                <label for="location">地點(Location):	</label>
-		                <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required><span style="color: red;">*</span><br>
+                <label for="location">地點(Location):	</label>
+                <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required><span style="color: red;">*</span><br>
 
-		                <label for="type">類型(Type): </label>
-		                <select name="type" id="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>">
-										    <option value="主日崇拜">主日崇拜</option>
-										    <option value="查經聚會">查經聚會</option>
-										    <option value="退修特會">退修特會</option>
-										    <option value="其他活動">其他活動</option>
-										</select><span style="color: red;">*</span><br>
+                <label for="type">類型(Type): </label>
+                <select name="type" id="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>">
+								    <option value="主日崇拜">主日崇拜</option>
+								    <option value="查經聚會">查經聚會</option>
+								    <option value="退修特會">退修特會</option>
+								    <option value="其他活動">其他活動</option>
+								</select><span style="color: red;">*</span><br>
 
-		                <label for="audiofile">錄音檔名 (Audio File Name):	</label>
-		                <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required><span style="color: red;">*</span><br>
+                <label for="audiofile">錄音檔名 (Audio File Name):	</label>
+                <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required><span style="color: red;">*</span><br>
 
-		                <label style="vertical-align: top;" for="remark">備註(Remark):	</label>
-		                <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>"></textarea><br>
+                <label style="vertical-align: top;" for="remark">備註(Remark):	</label>
+                <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>"></textarea><br>
 
                 <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
-		            <?php if ($audio_id && $audio->activeFlag == 'Active') : ?>
-		                <input class="button button-secondary" type="submit" name="delete" value="Delete">
-		            <?php endif; ?>
+                <?php if ($audio_id) : ?>
+                    <input class="button button-secondary" type="submit" name="soft" value="<?php echo $audio->activeFlag == 'Active' ? 'delete' : 'restore'; ?>">
+                <?php endif; ?>
                 <input class="button button-secondary" type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
             </form>
         </div>
@@ -219,31 +219,6 @@ class Audio_List_Admin {
           	$current_user = wp_get_current_user();
 		        global $wpdb;
 		        $audio_id = isset($_POST['audio_id']) ? intval($_POST['audio_id']) : 0;
-
-		        if (isset($_POST['delete']) && $audio_id) {
-		            // Perform soft delete (set activeFlag to false)
-		            $result = $wpdb->update(
-		                'wp_audio_list',
-		                array(
-		                	'activeFlag' => 'Inactive',
-		                	'updatedBy' => $current_user->user_login
-		                ),
-		                array('id' => $audio_id)
-		            );
-
-		            if ($result !== false) {
-		                // Set a transient message to display after redirect
-		                set_transient('custom_audio_list_message', 'Audio record deleted.', 30);
-		                // Redirect to the plugin root admin URL
-		                wp_redirect(admin_url('admin.php?page=select-audio'));
-		                exit;
-		            } else {
-		                // Display error message
-		                echo '<div class="notice notice-error is-dismissible"><p>Failed to delete audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
-		                return;
-		            }
-		        }
-
             $sermondate = sanitize_text_field($_POST['sermondate']);
             $speaker = sanitize_text_field($_POST['speaker']);
             $topic = sanitize_text_field($_POST['topic']);
@@ -253,52 +228,58 @@ class Audio_List_Admin {
             $remark = sanitize_text_field($_POST['remark']);
             $audiofile = sanitize_text_field($_POST['audiofile']);
             $bibleID = intval($_POST['bibleID']);
+            $message = 'Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
 
-            if ($audio_id) {
-                // Update existing audio record
-                $result = $wpdb->update(
-                    'wp_audio_list',
-                    array(
-                        'sermondate' => $sermondate,
-                        'speaker' => $speaker,
-                        'topic' => $topic,
-                        'section' => $section,
-                        'location' => $location,
-                        'type' => $type,
-                        'remark' => $remark,
-                        'audiofile' => $audiofile,
-                        'bibleID' => $bibleID,
-                        'updatedBy' => $current_user->user_login
-                    ),
-                    array('id' => $audio_id)
-                );
+		        if (isset($_POST['soft']) && $audio_id) {  // Perform soft delete (set activeFlag to false)
+		        	  $soft = sanitize_text_field($_POST['soft']);
+		            $result = $wpdb->update(
+		                'wp_audio_list',
+		                array(
+		                	'activeFlag' => $soft == 'delete' ? 'Inactive' : 'Active',
+		                	'updatedBy' => $current_user->user_login
+		                ),
+		                array('id' => $audio_id)
+		            );
 
-                $message = 'Audio List ' . $sermondate . ' ' . $speaker . ' ' . $topic . ' updated.';
-            } else {
-                // Insert new audio record
-                $result = $wpdb->insert(
-                    'wp_audio_list',
-                    array(
-                        'sermondate' => $sermondate,
-                        'speaker' => $speaker,
-                        'topic' => $topic,
-                        'section' => $section,
-                        'location' => $location,
-                        'type' => $type,
-                        'remark' => $remark,
-                        'audiofile' => $audiofile,
-                        'bibleID' => $bibleID,
-                        'updatedBy' => $current_user->user_login
-                    )
-                );
+		            if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
+		                set_transient('custom_audio_list_message', $message . ' successfully ' . ($soft == 'delete' ? ' deleted.' : ' restored.'), 30);
+		                wp_redirect(admin_url('admin.php?page=select-audio'));  // Redirect to the plugin root admin URL
+		                exit;
+		            } else {  // Display error message
+		                echo '<div class="notice notice-error is-dismissible"><p>Failed to alter audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
+		                return;
+		            }
+		        }
 
-                $message = 'Audio List ' . $sermondate . ' ' . $speaker . ' ' . $topic . ' added.';
-            }
+						$data = array(
+						    'sermondate' => $sermondate,
+						    'speaker' => $speaker,
+						    'topic' => $topic,
+						    'section' => $section,
+						    'location' => $location,
+						    'type' => $type,
+						    'remark' => $remark,
+						    'audiofile' => $audiofile,
+						    'bibleID' => $bibleID,
+						    'updatedBy' => $current_user->user_login
+						);
 
-            if ($result !== false) {
-                // Set a transient message to display after redirect
-                set_transient('custom_audio_list_message', $message, 30);
-                // Redirect to the plugin root admin URL
+						if ($audio_id) {  // Update existing audio record
+						    $result = $wpdb->update(
+						        'wp_audio_list',
+						        $data,
+						        array('id' => $audio_id)
+						    );
+						} else {
+						    $result = $wpdb->insert(   // Insert new audio record
+						        'wp_audio_list',
+						        $data
+						    );
+						}
+
+
+            if ($result !== false) {  // Set a transient message to display after redirect
+                set_transient('custom_audio_list_message', $message . ($audio_id ? ' successfully updated.' : ' successfully added.'), 30);  // Redirect to the plugin root admin URL
                 wp_redirect(admin_url('admin.php?page=audio-list-admin'));
                 exit;
             } else {
