@@ -3,8 +3,8 @@ Contributors: xjlin0
 Donate link: https://xjlin0.github.io/
 Tags: audio, player
 Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
+Tested up to: 6.5.3
+Stable tag: 6.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,13 +39,9 @@ you put the stable version, in order to eliminate any doubt.
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-e.g.
-
-1. Upload `audio-list.php` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<?php do_action('plugin_name_hook'); ?>` in your templates
+1. Download the plugin as a [ZIP file](https://github.com/xjlin0/audio-list/archive/master.zip) from GitHub.
+2. Install and Activate the plugin through the 'Plugins' and Upload menu in WordPress admin dashboard.
+3. Optionally, restore the Mysql database table `wp_audio_list`.
 
 == Frequently Asked Questions ==
 
@@ -68,19 +64,13 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 == Changelog ==
 
 = 1.0 =
-* A change since the previous version.
-* Another change.
+* Initial implantation.
 
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
 
 == Upgrade Notice ==
 
 = 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
-
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
+There's database table name change from the previous draft code, please change SQL INSERT table name accordingly for database restore.
 
 == Arbitrary section ==
 
@@ -110,5 +100,12 @@ services:
       WORDPRESS_DB_PASSWORD: 'host mysql password or empty string with quotes'
       WORDPRESS_DB_NAME: host_mysql_database_name
     volumes:
-      - ./wp-content:/var/www/html/wp-content
+      - ./wp-content:/var/www/html
 ```
+
+Please also add the following lines in html/.htaccess to overcome PHP upload limit:
+```
+php_value upload_max_filesize 500M
+php_value post_max_size 500M
+```
+Then after `docker-compose up`, please browse http://0.0.0.0:8888 

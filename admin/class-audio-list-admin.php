@@ -74,18 +74,18 @@ class Audio_List_Admin {
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Speaker</th>
-                        <th>Topic</th>
-                        <th>Type</th>
-                        <th>Location</th>
-                        <th>Section</th>
-                        <th>Action</th>
+                        <th>日期(Date)</th>
+                        <th>講員(Speaker)</th>
+                        <th>主題(Topic)</th>
+                        <th>類型(Type)</th>
+                        <th>地點(Location)</th>
+                        <th>經節(Section)</th>
+                        <th>選取(Action)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($audio_list as $audio) : ?>
-                        <tr class="<?php echo($audio->activeFlag === 'Active' ? '': 'strikethrough'); ?>">
+                        <tr title="<?php echo($audio->remark); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough'); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo esc_html($audio->topic); ?></td>
@@ -131,10 +131,9 @@ class Audio_List_Admin {
     }
 
     public function custom_audio_list_page() {
-        $audio_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         global $wpdb;
 
-        // Initialize empty values for form fields
+        $audio_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $sermondate_value = date('Y-m-d');
         $speaker_value = '';
         $topic_value = '';
@@ -145,11 +144,9 @@ class Audio_List_Admin {
         $audiofile_value = '';
         $bibleID_value = 0;
 
-        // If audio ID is provided, fetch the data from the database
-        if ($audio_id) {
+        if ($audio_id) {  // If audio ID is provided, fetch the data from the database
             $audio = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_audio_list WHERE id = %d", $audio_id));
-            if ($audio) {
-                // Pre-fill form fields with fetched data
+            if ($audio) {  // Pre-fill form fields with fetched data
                 $sermondate_value = $audio->sermondate;
                 $speaker_value = $audio->speaker;
                 $topic_value = $audio->topic;
@@ -285,8 +282,7 @@ class Audio_List_Admin {
                 set_transient('custom_audio_list_message', $message . ($audio_id ? ' successfully updated.' : ' successfully added.'), 30);  // Redirect to the plugin root admin URL
                 wp_redirect(admin_url('admin.php?page=audio-list-admin'));
                 exit;
-            } else {
-                // Display error message
+            } else {  // Display error message
                 echo '<div class="notice notice-error is-dismissible"><p>Failed to ' . ($audio_id ? 'update' : 'add') . ' audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
             }
         } else {
@@ -295,8 +291,7 @@ class Audio_List_Admin {
         }
     }
 
-    public function custom_admin_notice() {
-        // Display admin notice if there's a message set
+    public function custom_admin_notice() {   // Display admin notice if there's a message set
         if ($message = get_transient('custom_audio_list_message')) {
             $klass = false !== strpos($message, 'successfully') ? 'notice-success' : 'notice-error';
             ?>
