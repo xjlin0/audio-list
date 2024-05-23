@@ -64,7 +64,7 @@ class Audio_List_Admin {
 
     public function custom_select_audio_page() {
         global $wpdb;
-        $audio_list = $wpdb->get_results("SELECT * FROM wp_audio_list ORDER BY sermondate DESC, type, topic");
+        $audio_list = $wpdb->get_results("SELECT * FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
 
         ?>
         <div class="wrap">
@@ -77,9 +77,8 @@ class Audio_List_Admin {
                         <th>日期(Date)</th>
                         <th>講員(Speaker)</th>
                         <th>主題(Topic)</th>
-                        <th>類型(Type)</th>
-                        <th>地點(Location)</th>
                         <th>經節(Section)</th>
+                        <th>類型地點 (Type & location)</th>
                         <th>選取(Action)</th>
                     </tr>
                 </thead>
@@ -89,9 +88,8 @@ class Audio_List_Admin {
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo esc_html($audio->topic); ?></td>
-                            <td><?php echo esc_html($audio->type); ?></td>
-                            <td><?php echo esc_html($audio->location); ?></td>
                             <td><?php echo esc_html($audio->section); ?></td>
+                            <td><?php echo esc_html($audio->type) . ' ' . esc_html($audio->location); ?></td>
                             <td>
                                 <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-primary red'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Select</a>
                             </td>
@@ -212,9 +210,13 @@ class Audio_List_Admin {
 				            <form id="delete_restore_form" method="post" action="">
 						            <input type="hidden" name="action" value="custom_audio_list_form_submit">
 						            <?php wp_nonce_field('my_action', 'csrf_token'); ?>
-						            <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
-						            <input type="hidden" name="soft" value="<?php echo $audio->activeFlag === 'Active' ? 'delete' : 'restore'; ?>">
-						            <input class="button button-primary red" type="submit" value="<?php echo $audio->activeFlag === 'Active' ? 'Delete' : 'Restore'; ?>">
+						            <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>" readonly>
+						            <input type="hidden" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" readonly>
+						            <input type="hidden" name="type" value="<?php echo esc_attr($type_value); ?>" readonly>
+						            <input type="hidden" name="speaker" value="<?php echo esc_attr($speaker_value); ?>" readonly>
+						            <input type="hidden" name="topic" value="<?php echo esc_attr($topic_value); ?>" readonly>
+						            <input type="hidden" name="soft" value="<?php echo $audio->activeFlag === 'Active' ? 'delete' : 'restore'; ?>" readonly>
+						            <input onclick="return confirm('are you sure?')" class="button button-primary red" type="submit" value="<?php echo $audio->activeFlag === 'Active' ? 'Delete' : 'Restore'; ?>">
 						        </form>
 				        <?php endif; ?>
 				    </div>
@@ -225,8 +227,8 @@ class Audio_List_Admin {
     public function process_audio_list_form_submission() {
         ob_start();
         if (isset($_POST['csrf_token']) && wp_verify_nonce($_POST['csrf_token'], 'my_action')) {
+            global $wpdb;
           	$current_user = wp_get_current_user();
-		        global $wpdb;
 		        $audio_id = isset($_POST['audio_id']) ? intval($_POST['audio_id']) : 0;
             $sermondate = sanitize_text_field($_POST['sermondate']);
             $speaker = sanitize_text_field($_POST['speaker']);

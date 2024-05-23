@@ -54,7 +54,7 @@ class Audio_List_Activator {
         KEY `idx_sermondate` (`sermondate`),
         KEY `idx_type` (`type`),
         KEY `idx_activeFlag` (`activeFlag`)
-      ) $charset_collate;";
+      ) $charset_collate COMMENT='Audio List';";
 
       require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
       dbDelta( $sql );
