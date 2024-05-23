@@ -2,3 +2,15 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+.strikethrough {
+	text-decoration: line-through;
+}
+
+.fielderror {
+	color: red;
+}
+
+.top {
+  vertical-align: top;
+}

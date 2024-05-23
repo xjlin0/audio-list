@@ -85,8 +85,7 @@ class Audio_List_Admin {
                 </thead>
                 <tbody>
                     <?php foreach ($audio_list as $audio) : ?>
-                    	  <?php $style = $audio->activeFlag === 'Active' ? '': 'text-decoration: line-through' ?>
-                        <tr style="<?php echo $style; ?>">
+                        <tr class="<?php echo($audio->activeFlag === 'Active' ? '': 'strikethrough'); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo esc_html($audio->topic); ?></td>
@@ -94,7 +93,7 @@ class Audio_List_Admin {
                             <td><?php echo esc_html($audio->location); ?></td>
                             <td><?php echo esc_html($audio->section); ?></td>
                             <td>
-                                <a class="button button-primary" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Select</a>
+                                <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-secondary'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Select</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -176,19 +175,19 @@ class Audio_List_Admin {
                 <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
 
                 <label for="sermondate">日期 (mm/dd/yyyy):	</label>
-                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><span style="color: red;">*</span><br>
+                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><span class="fielderror">*</span><br>
 
                 <label for="speaker">講員(Speaker):	</label>
-                <input type="text" id="speaker" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required><span style="color: red;">*</span><br>
+                <input type="text" id="speaker" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required><span class="fielderror">*</span><br>
 
                 <label for="topic">主題(Topic):	</label>
-                <input type="text" id="topic" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required><span style="color: red;">*</span><br>
+                <input type="text" id="topic" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required><span class="fielderror">*</span><br>
 
                 <label for="section">經節(Section):	</label>
                 <input type="text" id="section" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
 
                 <label for="location">地點(Location):	</label>
-                <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required><span style="color: red;">*</span><br>
+                <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required><span class="fielderror">*</span><br>
 
                 <label for="type">類型(Type): </label>
                 <select name="type" id="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>">
@@ -196,20 +195,20 @@ class Audio_List_Admin {
 								    <option value="查經聚會">查經聚會</option>
 								    <option value="退修特會">退修特會</option>
 								    <option value="其他活動">其他活動</option>
-								</select><span style="color: red;">*</span><br>
+								</select><span class="fielderror">*</span><br>
 
                 <label for="audiofile">錄音檔名 (Audio File Name):	</label>
-                <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required><span style="color: red;">*</span><br>
+                <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required><span class="fielderror">*</span><br>
 
                 <label for="bibleID">聖經連結 (Bible Location ID):	</label>
                 <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
 
-                <label style="vertical-align: top;" for="remark">備註(Remark):	</label>
+                <label class="top" for="remark">備註(Remark):	</label>
                 <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>"></textarea><br>
 
                 <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
                 <?php if ($audio_id) : ?>
-                    <input class="button button-secondary" type="submit" name="soft" value="<?php echo $audio->activeFlag === 'Active' ? 'delete' : 'restore'; ?>">
+                    <input class="button button-secondary" type="submit" name="soft" value="<?php echo $audio->activeFlag === 'Active' ? 'Delete' : 'Restore'; ?>">
                 <?php endif; ?>
                 <input class="button button-secondary" type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
             </form>
