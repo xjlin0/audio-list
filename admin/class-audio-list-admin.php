@@ -69,7 +69,7 @@ class Audio_List_Admin {
         ?>
         <div class="wrap">
             <h1>修改錄音證道-選取證道錄音</h1>
-            <button class="button button-secondary" onclick="location.href='<?php echo admin_url('admin.php?page=audio-list-admin'); ?>'">Go Back</button>
+            <button class="button button-primary orange" onclick="location.href='<?php echo admin_url('admin.php?page=audio-list-admin'); ?>'">Go Back</button>
             <br><br>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
@@ -93,7 +93,7 @@ class Audio_List_Admin {
                             <td><?php echo esc_html($audio->location); ?></td>
                             <td><?php echo esc_html($audio->section); ?></td>
                             <td>
-                                <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-secondary'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Select</a>
+                                <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-primary red'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Select</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -125,14 +125,14 @@ class Audio_List_Admin {
             <br><br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=select-audio'); ?>'">2.修改證道錄音資料 (Update sermon record)</button>
             <br><br>
-            <button class="button button-secondary" onclick="location.href='<?php echo wp_logout_url(admin_url()); ?>'">登出系統 Log Out</button>
+            <button class="button button-primary orange" onclick="location.href='<?php echo wp_logout_url(admin_url()); ?>'">登出系統 Log Out</button>
         </div>
         <?php
     }
 
     public function custom_audio_list_page() {
         global $wpdb;
-
+        $current_user = wp_get_current_user();
         $audio_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $sermondate_value = date('Y-m-d');
         $speaker_value = '';
@@ -165,50 +165,59 @@ class Audio_List_Admin {
         ?>
         <div class="wrap">
             <h1><?php echo $audio_id ? 'Update Sermon Record 修改' : 'Create Sermon Record 新增'; ?>錄音證道</h1>
-            <form method="post" action="">
-                <input type="hidden" name="action" value="custom_audio_list_form_submit">
-                <?php wp_nonce_field('my_action', 'csrf_token'); ?>
+            <h2>Editor: <?php echo $current_user->user_login; ?>(WordPress Site Login)</h2>
+            <div class="form-container">
+		            <form id="main_form" method="post" action="">
+		                <input type="hidden" name="action" value="custom_audio_list_form_submit">
+		                <?php wp_nonce_field('my_action', 'csrf_token'); ?>
 
-                <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
+		                <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
 
-                <label for="sermondate">日期 (mm/dd/yyyy):	</label>
-                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><span class="fielderror">*</span><br>
+		                <label for="sermondate">日期 (mm/dd/yyyy):	</label>
+		                <input type="date" id="sermondate" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required><span class="fielderror">*</span><br>
 
-                <label for="speaker">講員(Speaker):	</label>
-                <input type="text" id="speaker" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required><span class="fielderror">*</span><br>
+		                <label for="speaker">講員(Speaker):	</label>
+		                <input type="text" id="speaker" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required><span class="fielderror">*</span><br>
 
-                <label for="topic">主題(Topic):	</label>
-                <input type="text" id="topic" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required><span class="fielderror">*</span><br>
+		                <label for="topic">主題(Topic):	</label>
+		                <input type="text" id="topic" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required><span class="fielderror">*</span><br>
 
-                <label for="section">經節(Section):	</label>
-                <input type="text" id="section" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
+		                <label for="section">經節(Section):	</label>
+		                <input type="text" id="section" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
 
-                <label for="location">地點(Location):	</label>
-                <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required><span class="fielderror">*</span><br>
+		                <label for="location">地點(Location):	</label>
+		                <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required><span class="fielderror">*</span><br>
 
-                <label for="type">類型(Type): </label>
-                <select name="type" id="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>">
-								    <option value="主日崇拜">主日崇拜</option>
-								    <option value="查經聚會">查經聚會</option>
-								    <option value="退修特會">退修特會</option>
-								    <option value="其他活動">其他活動</option>
-								</select><span class="fielderror">*</span><br>
+		                <label for="type">類型(Type): </label>
+		                <select name="type" id="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>">
+										    <option value="主日崇拜">主日崇拜</option>
+										    <option value="查經聚會">查經聚會</option>
+										    <option value="退修特會">退修特會</option>
+										    <option value="其他活動">其他活動</option>
+										</select><span class="fielderror">*</span><br>
 
-                <label for="audiofile">錄音檔名 (Audio File Name):	</label>
-                <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required><span class="fielderror">*</span><br>
+		                <label for="audiofile">錄音檔名 (Audio File Name):	</label>
+		                <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required><span class="fielderror">*</span><br>
 
-                <label for="bibleID">聖經連結 (Bible Location ID):	</label>
-                <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
+		                <label for="bibleID">聖經連結 (Bible Location ID):	</label>
+		                <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
 
-                <label class="top" for="remark">備註(Remark):	</label>
-                <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>"></textarea><br>
+		                <label class="top" for="remark">備註(Remark):	</label>
+		                <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>"></textarea><br>
 
-                <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
-                <?php if ($audio_id) : ?>
-                    <input class="button button-secondary" type="submit" name="soft" value="<?php echo $audio->activeFlag === 'Active' ? 'Delete' : 'Restore'; ?>">
-                <?php endif; ?>
-                <input class="button button-secondary" type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
-            </form>
+		                <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
+		                <input class="button button-primary orange" type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
+		            </form>
+		            <?php if ($audio_id) : ?>
+				            <form id="delete_restore_form" method="post" action="">
+						            <input type="hidden" name="action" value="custom_audio_list_form_submit">
+						            <?php wp_nonce_field('my_action', 'csrf_token'); ?>
+						            <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
+						            <input type="hidden" name="soft" value="<?php echo $audio->activeFlag === 'Active' ? 'delete' : 'restore'; ?>">
+						            <input class="button button-primary red" type="submit" value="<?php echo $audio->activeFlag === 'Active' ? 'Delete' : 'Restore'; ?>">
+						        </form>
+				        <?php endif; ?>
+				    </div>
         </div>
         <?php
     }
