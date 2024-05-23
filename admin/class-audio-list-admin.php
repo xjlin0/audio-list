@@ -75,7 +75,7 @@ class Audio_List_Admin {
             <br><br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin-post.php?action=select_audio'); ?>'">2.修改證道錄音資料 (Update sermon record)</button>
             <br><br>
-            <button class="button button-secondary" onclick="location.href='<?php echo wp_logout_url(admin_url()); ?>'">Logout</button>
+            <button class="button button-secondary" onclick="location.href='<?php echo wp_logout_url(admin_url()); ?>'">登出系統 Log Out</button>
         </div>
         <?php
     }
