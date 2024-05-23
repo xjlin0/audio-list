@@ -30,7 +30,6 @@ class Audio_List_Admin {
         $this->version = $version;
         add_action('admin_menu', array($this, 'add_plugin_menu_pages'));
         add_action('admin_post_custom_audio_list_form_submit', array($this, 'process_audio_list_form_submission'));
-        // Handle form submission before any HTML is output
         add_action('admin_init', array($this, 'handle_form_submission'));
         add_action('admin_notices', array($this, 'custom_admin_notice'));
     }
@@ -69,7 +68,7 @@ class Audio_List_Admin {
 
         ?>
         <div class="wrap">
-            <h1>Select Audio to Edit</h1>
+            <h1>修改錄音證道-選取證道錄音</h1>
             <button class="button button-secondary" onclick="location.href='<?php echo admin_url('admin.php?page=audio-list-admin'); ?>'">Go Back</button>
             <br><br>
             <table class="wp-list-table widefat fixed striped">
@@ -79,20 +78,23 @@ class Audio_List_Admin {
                         <th>Speaker</th>
                         <th>Topic</th>
                         <th>Type</th>
-                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Section</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($audio_list as $audio) : ?>
-                        <tr>
+                    	  <?php $style = $audio->activeFlag === 'Active' ? '': 'text-decoration: line-through' ?>
+                        <tr style="<?php echo $style; ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo esc_html($audio->topic); ?></td>
                             <td><?php echo esc_html($audio->type); ?></td>
-                            <td><?php echo esc_html($audio->activeFlag); ?></td>
+                            <td><?php echo esc_html($audio->location); ?></td>
+                            <td><?php echo esc_html($audio->section); ?></td>
                             <td>
-                                <a href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Edit</a>
+                                <a class="button button-primary" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Select</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -166,7 +168,7 @@ class Audio_List_Admin {
 
         ?>
         <div class="wrap">
-            <h1><?php echo $audio_id ? 'Update' : 'Create'; ?> Sermon Record</h1>
+            <h1><?php echo $audio_id ? 'Update Sermon Record 修改' : 'Create Sermon Record 新增'; ?>錄音證道</h1>
             <form method="post" action="">
                 <input type="hidden" name="action" value="custom_audio_list_form_submit">
                 <?php wp_nonce_field('my_action', 'csrf_token'); ?>
@@ -185,9 +187,6 @@ class Audio_List_Admin {
                 <label for="section">經節(Section):	</label>
                 <input type="text" id="section" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>"><br>
 
-                <label for="bibleID">Bible ID:</label>
-                <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
-
                 <label for="location">地點(Location):	</label>
                 <input type="text" id="location" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required><span style="color: red;">*</span><br>
 
@@ -202,12 +201,15 @@ class Audio_List_Admin {
                 <label for="audiofile">錄音檔名 (Audio File Name):	</label>
                 <input type="text" id="audiofile" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required><span style="color: red;">*</span><br>
 
+                <label for="bibleID">聖經連結 (Bible Location ID):	</label>
+                <input type="number" id="bibleID" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>"><br>
+
                 <label style="vertical-align: top;" for="remark">備註(Remark):	</label>
                 <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>"></textarea><br>
 
                 <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
                 <?php if ($audio_id) : ?>
-                    <input class="button button-secondary" type="submit" name="soft" value="<?php echo $audio->activeFlag == 'Active' ? 'delete' : 'restore'; ?>">
+                    <input class="button button-secondary" type="submit" name="soft" value="<?php echo $audio->activeFlag === 'Active' ? 'delete' : 'restore'; ?>">
                 <?php endif; ?>
                 <input class="button button-secondary" type="button" onclick="history.back()" value="Go Back" class="btn btn-warning">
             </form>
@@ -237,14 +239,14 @@ class Audio_List_Admin {
 		            $result = $wpdb->update(
 		                'wp_audio_list',
 		                array(
-		                	'activeFlag' => $soft == 'delete' ? 'Inactive' : 'Active',
+		                	'activeFlag' => $soft === 'delete' ? 'Inactive' : 'Active',
 		                	'updatedBy' => $current_user->user_login
 		                ),
 		                array('id' => $audio_id)
 		            );
 
 		            if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
-		                set_transient('custom_audio_list_message', $message . ' successfully ' . ($soft == 'delete' ? ' deleted.' : ' restored.'), 30);
+		                set_transient('custom_audio_list_message', $message . ' successfully ' . ($soft === 'delete' ? ' deleted.' : ' restored.'), 30);
 		                wp_redirect(admin_url('admin.php?page=select-audio'));  // Redirect to the plugin root admin URL
 		                exit;
 		            } else {  // Display error message
