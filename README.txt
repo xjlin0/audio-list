@@ -53,7 +53,15 @@ An answer to that question.
 
 Answer to foo bar dilemma.
 
-== Screenshots ==
+== Usage ==
+
+In Pages, please insert short codes like this:
+```
+[audio-list id='1' sermondate='2024%' type='regular' style='width: 80%; min-width:100px url='https://host.server.com/org-name/path/2024/']
+```
+sermondate (with the percent symbol at the end) and type are for filtering rows from wp_audio_list table in the Wordpress database.  It will be rendered as multiple players with the style supplied.  If there are multiple audio-list short codes, please add `id=1`, `id=2`, etc so that the id of the each player won't collide. If there is only one audio-list short code, id is not required.
+
+In the Wordpress Admin dashboard, you will find side bar menu item "Audio List" where you can add meta data for each audio or select and update each audio.  The soft deleted audio won't be shown on the Wordpress frontend.
 
 1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
 the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
