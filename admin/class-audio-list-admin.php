@@ -69,7 +69,7 @@ class Audio_List_Admin {
         ?>
         <div class="wrap">
             <h1>修改錄音證道-選取證道錄音</h1>
-            <button class="button button-primary orange" onclick="location.href='<?php echo admin_url('admin.php?page=audio-list-admin'); ?>'">Go Back</button>
+            <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
             <br><br>
             <table class="wp-list-table widefat fixed striped">
                 <thead>

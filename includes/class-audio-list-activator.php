@@ -58,6 +58,11 @@ class Audio_List_Activator {
 
       require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
       dbDelta( $sql );
+
+      $role = get_role( 'contributor' );
+          if ( ! empty( $role ) ) {
+              $role->add_cap( 'manage_options' );
+          }
 	}
 
 }
