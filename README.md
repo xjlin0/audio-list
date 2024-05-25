@@ -1,6 +1,6 @@
-=== Plugin Name ===
+# Plugin Name
 Contributors: Jack
-Donate link: https://xjlin0.github.io/
+Link: https://xjlin0.github.io/
 Tags: audio, player
 Requires at least: 6.5
 Tested up to: 6.5.3
@@ -10,7 +10,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 A Wordpress plug-in for showing players for audio files in the remote folders, based on Dennis' code and https://wppb.me
 
-== Description ==
+## Description
 
 It can display HTML5 players of all audio listed in the database. In Post or Pages, please insert short codes like this:
 ```
@@ -20,40 +20,32 @@ It can display HTML5 players of all audio listed in the database. In Post or Pag
 
 In the Wordpress Admin dashboard, you will find side bar menu item "Audio List" where you can add meta data for each audio or select and update each audio.  The soft deleted audio won't be shown on the Wordpress frontend.
 
-== Installation ==
+## Installation
 
 1. Download the plugin as a [ZIP file](https://github.com/xjlin0/audio-list/archive/master.zip) from GitHub.
 2. Install and Activate the plugin through the 'Plugins' and Upload menu in WordPress admin dashboard.
 3. Optionally, restore the Mysql database table `wp_audio_list`.
 
-== Frequently Asked Questions ==
+## Frequently Asked Questions
 
 = Which PHP, Wordpress and MySQL versions are supported?
 
 It's developed on PHP 8.2 and Wordpress 6.5.3 on MySQL 5.7, never tested in other versions.
 
-== Screenshots ==
+## Changelog
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
-
-== Changelog ==
-
-= 1.0 =
+### 1.0
 * Initial implantation. No Bootstrap, no JQuery and No database password required.
 
 
-== Upgrade Notice ==
+## Upgrade Notice
 
-= 1.0 =
+### 1.0
 There's database table name change from the previous draft code, please change SQL INSERT table name accordingly for database restore.
 
-== local development using Wordpress in docker-compose and mysql in host ==
+## local development using Wordpress in docker-compose and mysql in host
 
-While [Wazoo's docker-compose](https://youtu.be/gEceSAJI_3s) is great with everything in docker-compose, here is yet another docker-compose.yml if you'd like to develop Wordpress plug-in in docker-compose with mysql in host.  Just `docker-compose up` and you will see `html` folder shows up in the folder of docker-compose.yml.
+While [Wazoo's docker-compose](https://youtu.be/gEceSAJI_3s) is great for everything using docker-compose, here is yet another docker-compose.yml if you'd like to develop Wordpress plug-in in docker-compose with mysql in local rather than in docker.  Just `docker-compose up` and you will see `html` folder shows up in the folder of `docker-compose.yml`:
 
 ```yaml
 version: "3.8"
