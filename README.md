@@ -1,12 +1,12 @@
 # Plugin Name
-Contributors: Jack
-Link: https://xjlin0.github.io/
-Tags: audio, player
-Requires at least: 6.5
-Tested up to: 6.5.3
-Stable tag:
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Contributors: Jack  
+Link: https://xjlin0.github.io/  
+Tags: audio, player  
+Requires at least: 6.5  
+Tested up to: 6.5.3  
+Stable tag:  
+License: Apache-2.0 license  
+License URI: https://github.com/xjlin0/audio-list?tab=Apache-2.0-1-ov-file  
 
 A Wordpress plug-in for showing players for audio files in the remote folders, based on Dennis' code and https://wppb.me
 
