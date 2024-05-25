@@ -28,6 +28,7 @@ In the Wordpress Admin dashboard, Contributors will find side bar menu item "Aud
 
 ## Streenshots
 ![A screenshot of audio list in Wordpress admin dashboard](./assets/audios.jpg)
+![A screenshot of Wordpress showing audio players](./assets/frontend.jpg)
 
 ## Frequently Asked Questions
 
