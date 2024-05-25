@@ -38,7 +38,7 @@ class Audio_List_Activator {
 
       $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         `id` int(11) NOT NULL AUTO_INCREMENT,
-        `sermondate` date DEFAULT NULL,
+        `sermondate` date DEFAULT NULL COMMENT 'YYYY-MM-DD',
         `speaker` varchar(255) COLLATE $collate DEFAULT NULL,
         `topic` varchar(255) COLLATE $collate DEFAULT NULL,
         `section` varchar(255) COLLATE $collate DEFAULT NULL,
@@ -46,15 +46,15 @@ class Audio_List_Activator {
         `type` varchar(45) COLLATE $collate NOT NULL DEFAULT '主日崇拜',
         `remark` varchar(255) COLLATE $collate DEFAULT NULL,
         `audiofile` varchar(255) COLLATE $collate DEFAULT NULL,
-        `bibleID` int(11) DEFAULT '0',
+        `bibleID` int(11) DEFAULT 0,
         `updatedBy` varchar(255) COLLATE $collate DEFAULT NULL,
         `updatedTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `activeFlag` varchar(45) COLLATE $collate DEFAULT 'Active',
         PRIMARY KEY (`id`),
-        KEY `idx_sermondate` (`sermondate`),
-        KEY `idx_type` (`type`),
-        KEY `idx_activeFlag` (`activeFlag`)
-      ) $charset_collate COMMENT='Audio List';";
+        KEY `idx_sermondate` (`sermondate`) USING BTREE,
+        KEY `idx_type` (`type`) USING HASH,
+        KEY `idx_activeFlag` (`activeFlag`) USING HASH
+      ) $charset_collate COMMENT='Audio List to store meta data';";
 
       require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
       dbDelta( $sql );

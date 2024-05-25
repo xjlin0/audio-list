@@ -17,7 +17,7 @@
  * Plugin URI:        https://github.com/xjlin0/audio-list
  * Description:       A Wordpress plug-in for showing players for audio files in the remote folders, based on Dennis's code. (Audio files meta info stored in local database)
  * Version:           1.0.0
- * Author:            Jack Lin
+ * Author:            Jack
  * Author URI:        https://xjlin0.github.io/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
