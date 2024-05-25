@@ -18,7 +18,7 @@ It can display HTML5 players of all audio listed in the database. In Post or Pag
 ```
 `sermondate%` (with the percent symbol at the end) and `type` are for filtering rows from `wp_audio_list` table in the Wordpress database.  It will be rendered as multiple players with the style supplied.  The player will get the file `url` from url specified with the value of `audiofile` from database. If there are multiple audio-list short codes, please add `id=1`, `id=2`, etc so that the id of the each player won't collide. If there is only one audio-list short code, id is not required.
 
-In the Wordpress Admin dashboard, you will find side bar menu item "Audio List" where you can add meta data for each audio or select and update each audio.  The soft deleted audio won't be shown on the Wordpress frontend.
+In the Wordpress Admin dashboard, Contributors will find side bar menu item "Audio List" where you can add meta data for each audio or select and update each audio.  The soft deleted audio won't be shown on the Wordpress frontend.
 
 ## Installation
 
@@ -26,9 +26,12 @@ In the Wordpress Admin dashboard, you will find side bar menu item "Audio List" 
 2. Install and Activate the plugin through the 'Plugins' and Upload menu in WordPress admin dashboard.
 3. Optionally, restore the Mysql database table `wp_audio_list`.
 
+## Streenshots
+![A screenshot of audio list in Wordpress admin dashboard](./assets/audios.jpg)
+
 ## Frequently Asked Questions
 
-= Which PHP, Wordpress and MySQL versions are supported?
+### Which PHP, Wordpress and MySQL versions are supported?
 
 It's developed on PHP 8.2 and Wordpress 6.5.3 on MySQL 5.7, never tested in other versions.
 
