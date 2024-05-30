@@ -64,7 +64,7 @@ class Audio_List_Admin {
 
     public function custom_select_audio_page() {
         global $wpdb;
-        $audio_list = $wpdb->get_results("SELECT * FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
+        $audio_list = $wpdb->get_results("SELECT id, activeFlag, sermondate, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
 
         ?>
         <div class="wrap">
@@ -138,9 +138,11 @@ class Audio_List_Admin {
         $section_value = '';
         $location_value = '海沃教會';
         $type_value = '';
-        $remark_value = '';
+        $remark_value = null;
+        $note_value = null;
         $audiofile_value = '';
         $bibleID_value = 0;
+        $operation = '';
 
         if ($audio_id) {  // If audio ID is provided, fetch the data from the database
             $audio = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_audio_list WHERE id = %d", $audio_id));
@@ -152,8 +154,10 @@ class Audio_List_Admin {
                 $location_value = $audio->location;
                 $type_value = $audio->type;
                 $remark_value = $audio->remark;
+                $note_value = $audio->note;
                 $audiofile_value = $audio->audiofile;
                 $bibleID_value = $audio->bibleID;
+                $operation = $audio->activeFlag === 'Active' ? 'delete' : 'restore';
             } else {
                 echo 'Audio record not found.';
                 return;
@@ -166,125 +170,134 @@ class Audio_List_Admin {
             <h2>Editor: <?php echo $current_user->user_login; ?>(WordPress Site Login)</h2>
             <div class="form-container">
                 <form id="main_form" method="post" action="">
-		                <input type="hidden" name="action" value="custom_audio_list_form_submit">
-		                <?php wp_nonce_field('my_action', 'csrf_token'); ?>
-		                <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
+	                <input type="hidden" name="action" value="custom_audio_list_form_submit">
+	                <?php wp_nonce_field('my_action', 'csrf_token'); ?>
+	                <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>">
 
-				            <table border="0" class="wp-list-table widefat striped">
-												<thead>
-												    <tr>
-												        <th class="textright">
-												            Field
-												        </th>
-												        <th>
-												            Value
-												        </th>
-												    </tr>
-												</thead>
-												<tbody>
-														<tr>
-															  <td align="right">
-														        日期 (mm/dd/yyyy):
-														    </td>
-														    <td>
-														        <input type="date" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required>
-														        <span class="fielderror">*</span>
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        講員(Speaker):
-														    </td>
-														    <td>
-														        <input type="text" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required>
-														        <span class="fielderror">*</span>
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        主題(Topic):
-														    </td>
-														    <td>
-														        <input type="text" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required>
-														        <span class="fielderror">*</span>
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        經節(Section):
-														    </td>
-														    <td>
-														        <input type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        地點(Location):
-														    </td>
-														    <td>
-														        <input type="text" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required>
-														        <span class="fielderror">*</span>
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        類型(Type):
-														    </td>
-														    <td>
-														        <select name="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>">
-																		    <option value="主日崇拜">主日崇拜</option>
-																		    <option value="查經聚會">查經聚會</option>
-																		    <option value="退修特會">退修特會</option>
-																		    <option value="其他活動">其他活動</option>
-																		</select>
-																		<span class="fielderror">*</span>
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        錄音檔名 (Audio File Name):
-														    </td>
-														    <td>
-														        <input type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required>
-														        <span class="fielderror">*</span>
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        聖經連結 (Bible Location ID):
-														    </td>
-														    <td>
-														        <input type="number" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>">
-														    </td>
-														</tr>
-														<tr>
-															  <td align="right">
-														        備註(Remark):
-														    </td>
-														    <td>
-														        <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>">
-														        </textarea>
-														    </td>
-														</tr>
-                        </tbody>
-						        </table>
-		                <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
-		                <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
-				        </form>
-		            <?php if ($audio_id) : ?>
-				            <form id="delete_restore_form" method="post" action="">
-						            <input type="hidden" name="action" value="custom_audio_list_form_submit">
-						            <?php wp_nonce_field('my_action', 'csrf_token'); ?>
-						            <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>" readonly>
-						            <input type="hidden" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" readonly>
-						            <input type="hidden" name="type" value="<?php echo esc_attr($type_value); ?>" readonly>
-						            <input type="hidden" name="speaker" value="<?php echo esc_attr($speaker_value); ?>" readonly>
-						            <input type="hidden" name="topic" value="<?php echo esc_attr($topic_value); ?>" readonly>
-						            <input type="hidden" name="operation" value="<?php echo $audio->activeFlag === 'Active' ? 'delete' : 'restore'; ?>" readonly>
-						            <input onclick="return confirm('are you sure?')" class="button button-primary red" type="submit" value="<?php echo $audio->activeFlag === 'Active' ? 'Delete' : 'Restore'; ?>">
-						        </form>
-				        <?php endif; ?>
-				    </div>
+		            <table border="0" class="wp-list-table widefat striped">
+						<thead>
+						    <tr>
+						        <th class="textright">
+						            Field
+						        </th>
+						        <th>
+						            Value
+						        </th>
+						    </tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="right">
+							        日期 (mm/dd/yyyy):
+							    </td>
+							    <td>
+							        <input type="date" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required>
+							        <span class="fielderror">*</span>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        講員(Speaker):
+							    </td>
+							    <td>
+							        <input type="text" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required>
+							        <span class="fielderror">*</span>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        主題(Topic):
+							    </td>
+							    <td>
+							        <input type="text" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required>
+							        <span class="fielderror">*</span>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        經節(Section):
+							    </td>
+							    <td>
+							        <input type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        地點(Location):
+							    </td>
+							    <td>
+							        <input type="text" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required>
+							        <span class="fielderror">*</span>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        類型(Type):
+							    </td>
+							    <td>
+							        <select name="type" maxlength="45" name="type" value="<?php echo esc_attr($type_value); ?>">
+									    <option value="主日崇拜">主日崇拜</option>
+									    <option value="查經聚會">查經聚會</option>
+									    <option value="退修特會">退修特會</option>
+									    <option value="其他活動">其他活動</option>
+									</select>
+									<span class="fielderror">*</span>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        錄音檔名 (Audio File Name):
+							    </td>
+							    <td>
+							        <input type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required>
+							        <span class="fielderror">*</span>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        聖經連結 (Bible Location ID):
+							    </td>
+							    <td>
+							        <input type="number" name="bibleID" value="<?php echo esc_attr($bibleID_value); ?>">
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        內部備註(Internal remark):
+							    </td>
+							    <td>
+							        <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>">
+							        </textarea>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        公開註記(Public note):
+							    </td>
+							    <td>
+							        <textarea id="note" maxlength="21845" name="note" cols="50" rows="6" value="<?php echo esc_attr($note_value); ?>">
+							        </textarea>
+							    </td>
+							</tr>
+						</tbody>
+				    </table>
+	                <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
+	                <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
+			    </form>
+	            <?php if ($audio_id) : ?>
+		            <form id="delete_restore_form" method="post" action="">
+			            <input type="hidden" name="action" value="custom_audio_list_form_submit">
+			            <?php wp_nonce_field('my_action', 'csrf_token'); ?>
+			            <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>" readonly>
+			            <input type="hidden" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" readonly>
+			            <input type="hidden" name="type" value="<?php echo esc_attr($type_value); ?>" readonly>
+			            <input type="hidden" name="speaker" value="<?php echo esc_attr($speaker_value); ?>" readonly>
+			            <input type="hidden" name="topic" value="<?php echo esc_attr($topic_value); ?>" readonly>
+			            <input type="hidden" name="operation" value="<?php echo esc_attr($operation); ?>" readonly>
+			            <input onclick="return confirm('Are you sure to <?php echo esc_attr($operation); ?>?')" class="button button-primary red" type="submit" value="<?php echo esc_attr($operation); ?>">
+				    </form>
+		        <?php endif; ?>
+		    </div>
         </div>
         <?php
     }
@@ -294,7 +307,7 @@ class Audio_List_Admin {
         if (isset($_POST['csrf_token']) && wp_verify_nonce($_POST['csrf_token'], 'my_action')) {
             global $wpdb;
           	$current_user = wp_get_current_user();
-		        $audio_id = isset($_POST['audio_id']) ? intval($_POST['audio_id']) : 0;
+	        $audio_id = isset($_POST['audio_id']) ? intval($_POST['audio_id']) : 0;
             $sermondate = sanitize_text_field($_POST['sermondate']);
             $speaker = sanitize_text_field($_POST['speaker']);
             $topic = sanitize_text_field($_POST['topic']);
@@ -302,57 +315,58 @@ class Audio_List_Admin {
             $location = sanitize_text_field($_POST['location']);
             $type = sanitize_text_field($_POST['type']);
             $remark = sanitize_text_field($_POST['remark']);
+            $note = sanitize_text_field($_POST['note']);
             $audiofile = sanitize_text_field($_POST['audiofile']);
             $bibleID = intval($_POST['bibleID']);
             $message = 'Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
 
-		        if (isset($_POST['operation']) && $audio_id) {  // Perform soft delete (set activeFlag to false)
-                $operation = sanitize_text_field($_POST['operation']);
-		            $result = $wpdb->update(
-		                'wp_audio_list',
-		                array(
-                      'activeFlag' => $operation === 'delete' ? 'Inactive' : 'Active',
-		                	'updatedBy' => $current_user->user_login
-		                ),
-		                array('id' => $audio_id)
-		            );
+	        if (isset($_POST['operation']) && $audio_id) {  // Perform soft delete (set activeFlag to false) and exit
+            	$operation = sanitize_text_field($_POST['operation']);
+	            $result = $wpdb->update(
+	                'wp_audio_list',
+	                array(
+                  'activeFlag' => $operation === 'delete' ? 'Inactive' : 'Active',
+	                	'updatedBy' => $current_user->user_login
+	                ),
+	                array('id' => $audio_id)
+	            );
 
-		            if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
-		                set_transient('custom_audio_list_message', $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.'), 30);
-		                wp_redirect(admin_url('admin.php?page=select-audio'));  // Redirect to the plugin root admin URL
-		                exit;
-		            } else {  // Display error message
-		                echo '<div class="notice notice-error is-dismissible"><p>Failed to alter audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
-		                return;
-		            }
-		        }
+	            if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
+	                set_transient('custom_audio_list_message', $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.'), 30);
+	                wp_redirect(admin_url('admin.php?page=select-audio'));  // Redirect to the plugin root admin URL
+	                exit;
+	            } else {  // Display error message
+	                echo '<div class="notice notice-error is-dismissible"><p>Failed to alter audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
+	                return;
+	            }
+	        }
 
-						$data = array(
-						    'sermondate' => $sermondate,
-						    'speaker' => $speaker,
-						    'topic' => $topic,
-						    'section' => $section,
-						    'location' => $location,
-						    'type' => $type,
-						    'remark' => $remark,
-						    'audiofile' => $audiofile,
-						    'bibleID' => $bibleID,
-						    'updatedBy' => $current_user->user_login
-						);
+			$data = array(
+			    'sermondate' => $sermondate,
+			    'speaker' => $speaker,
+			    'topic' => $topic,
+			    'section' => $section,
+			    'location' => $location,
+			    'type' => $type,
+			    'remark' => $remark,
+			    'note' => $note,
+			    'audiofile' => $audiofile,
+			    'bibleID' => $bibleID,
+			    'updatedBy' => $current_user->user_login
+			);
 
-						if ($audio_id) {  // Update existing audio record
-						    $result = $wpdb->update(
-						        'wp_audio_list',
-						        $data,
-						        array('id' => $audio_id)
-						    );
-						} else {
-						    $result = $wpdb->insert(   // Insert new audio record
-						        'wp_audio_list',
-						        $data
-						    );
-						}
-
+			if ($audio_id) {  // Update existing audio record
+			    $result = $wpdb->update(
+			        'wp_audio_list',
+			        $data,
+			        array('id' => $audio_id)
+			    );
+			} else {
+			    $result = $wpdb->insert(   // Insert new audio record
+			        'wp_audio_list',
+			        $data
+			    );
+			}
 
             if ($result !== false) {  // Set a transient message to display after redirect
                 set_transient('custom_audio_list_message', $message . ($audio_id ? ' successfully updated.' : ' successfully added.'), 30);  // Redirect to the plugin root admin URL
