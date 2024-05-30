@@ -266,8 +266,7 @@ class Audio_List_Admin {
 							        內部備註(Internal remark):
 							    </td>
 							    <td>
-							        <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5" value="<?php echo esc_attr($remark_value); ?>">
-							        </textarea>
+							        <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5"><?php echo esc_attr($remark_value); ?></textarea>
 							    </td>
 							</tr>
 							<tr>
@@ -275,8 +274,7 @@ class Audio_List_Admin {
 							        公開註記(Public note):
 							    </td>
 							    <td>
-							        <textarea id="note" maxlength="21845" name="note" cols="50" rows="6" value="<?php echo esc_attr($note_value); ?>">
-							        </textarea>
+							        <textarea id="note" maxlength="21845" name="note" cols="50" rows="6"><?php echo esc_attr($note_value); ?></textarea>
 							    </td>
 							</tr>
 						</tbody>
@@ -344,13 +342,13 @@ class Audio_List_Admin {
 			$data = array(
 			    'sermondate' => $sermondate,
 			    'speaker' => $speaker,
-			    'topic' => $topic,
-			    'section' => $section,
+			    'topic' => empty($topic) ? null : $topic,
+			    'section' => empty($section) ? null : $section,
 			    'location' => $location,
 			    'type' => $type,
-			    'remark' => $remark,
-			    'note' => $note,
-			    'audiofile' => $audiofile,
+			    'remark' => empty($remark) ? null : $remark,
+			    'note' => empty($note) ? null : $note,
+			    'audiofile' => empty($audiofile) ? null : $audiofile,
 			    'bibleID' => $bibleID,
 			    'updatedBy' => $current_user->user_login
 			);
