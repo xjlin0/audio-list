@@ -84,7 +84,7 @@ class Audio_List_Admin {
                 </thead>
                 <tbody>
                     <?php foreach ($audio_list as $audio) : ?>
-                        <tr title="<?php echo($audio->remark); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough'); ?>">
+                        <tr title="<?php echo(esc_attr($audio->remark)); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough'); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo esc_html($audio->topic); ?></td>
@@ -138,8 +138,9 @@ class Audio_List_Admin {
         $section_value = '';
         $location_value = '海沃教會';
         $type_value = '';
-        $remark_value = null;
-        $note_value = null;
+        $remark_value = '';
+        $note_value = '';
+        $series_value = '';
         $audiofile_value = '';
         $bibleID_value = 0;
         $operation = '';
@@ -157,6 +158,7 @@ class Audio_List_Admin {
                 $note_value = $audio->note;
                 $audiofile_value = $audio->audiofile;
                 $bibleID_value = $audio->bibleID;
+                $series_value = $audio->series;
                 $operation = $audio->activeFlag === 'Active' ? 'delete' : 'restore';
             } else {
                 echo 'Audio record not found.';
@@ -246,6 +248,14 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
+							        系列名稱 (series):
+							    </td>
+							    <td>
+							        <input type="text" maxlength="45" name="series" value="<?php echo esc_attr($series_value); ?>">
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
@@ -307,14 +317,15 @@ class Audio_List_Admin {
           	$current_user = wp_get_current_user();
 	        $audio_id = isset($_POST['audio_id']) ? intval($_POST['audio_id']) : 0;
             $sermondate = sanitize_text_field($_POST['sermondate']);
-            $speaker = sanitize_text_field($_POST['speaker']);
-            $topic = sanitize_text_field($_POST['topic']);
-            $section = sanitize_text_field($_POST['section']);
-            $location = sanitize_text_field($_POST['location']);
+            $speaker = html_entity_decode(sanitize_text_field($_POST['speaker']));
+            $topic = html_entity_decode(sanitize_text_field($_POST['topic']));
+            $section = html_entity_decode(sanitize_text_field($_POST['section']));
+            $location = html_entity_decode(sanitize_text_field($_POST['location']));
             $type = sanitize_text_field($_POST['type']);
-            $remark = sanitize_text_field($_POST['remark']);
-            $note = sanitize_text_field($_POST['note']);
-            $audiofile = sanitize_text_field($_POST['audiofile']);
+            $remark = html_entity_decode(sanitize_text_field($_POST['remark']));
+            $note = html_entity_decode(sanitize_text_field($_POST['note']));
+            $series = html_entity_decode(sanitize_text_field($_POST['series']));
+            $audiofile = html_entity_decode(sanitize_text_field($_POST['audiofile']));
             $bibleID = intval($_POST['bibleID']);
             $message = 'Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
 
@@ -341,14 +352,15 @@ class Audio_List_Admin {
 
 			$data = array(
 			    'sermondate' => $sermondate,
-			    'speaker' => $speaker,
-			    'topic' => empty($topic) ? null : $topic,
-			    'section' => empty($section) ? null : $section,
-			    'location' => $location,
+			    'speaker' => trim($speaker),
+			    'topic' => trim($topic),
+			    'section' => trim($section),
+			    'location' => trim($location),
 			    'type' => $type,
-			    'remark' => empty($remark) ? null : $remark,
-			    'note' => empty($note) ? null : $note,
-			    'audiofile' => empty($audiofile) ? null : $audiofile,
+			    'remark' => trim($remark),
+			    'series' => trim($series),
+			    'note' => trim($note),
+			    'audiofile' => trim($audiofile),
 			    'bibleID' => $bibleID,
 			    'updatedBy' => $current_user->user_login
 			);

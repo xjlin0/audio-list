@@ -40,8 +40,9 @@ class Audio_List_Activator {
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `updatedTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `sermondate` date DEFAULT NULL COMMENT 'YYYY-MM-DD',
-        `bibleID` int(11) DEFAULT 0 COMMENT 'for referencing verse id to Bible database',
+        `bibleID` int(11) DEFAULT 0 COMMENT 'for referencing verse id',
         `type` varchar(45) COLLATE $collate NOT NULL DEFAULT '主日崇拜',
+        `note` text COLLATE $collate DEFAULT NULL COMMENT 'for public display',
         `updatedBy` varchar(255) COLLATE $collate DEFAULT NULL COMMENT 'username updating the record',
         `activeFlag` varchar(45) COLLATE $collate DEFAULT 'Active' COMMENT 'for soft deletion',
         `audiofile` varchar(255) COLLATE $collate DEFAULT NULL COMMENT 'remote filename',
@@ -49,11 +50,12 @@ class Audio_List_Activator {
         `speaker` varchar(255) COLLATE $collate DEFAULT NULL,
         `topic` varchar(255) COLLATE $collate DEFAULT NULL,
         `section` varchar(255) COLLATE $collate DEFAULT NULL COMMENT 'verse info for human eyes',
-        `remark` varchar(255) COLLATE $collate DEFAULT NULL COMMENT 'for internal coworkers',
-        `note` text COLLATE $collate DEFAULT NULL COMMENT 'for public display',
+        `series` varchar(45) COLLATE $collate DEFAULT '' COMMENT 'for extra classification',
+        `remark` varchar(255) COLLATE $collate DEFAULT '' COMMENT 'for internal coworkers',
         PRIMARY KEY (`id`),
         KEY `idx_sermondate` (`sermondate`) USING BTREE,
         KEY `idx_type` (`type`) USING HASH,
+        KEY `idx_series` (`series`) USING BTREE,
         KEY `idx_activeFlag` (`activeFlag`) USING HASH
       ) $charset_collate COMMENT='Audio List to store meta data';";
 

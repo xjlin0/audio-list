@@ -59,6 +59,7 @@ class Audio_List_Public {
 	    $atts = shortcode_atts(array(
 	        'sermondate' => '',
 	        'type' => '',
+	        'series' => '',
 	        'url' => '',
 	        'style' => '',
 	        'id' => ''
@@ -66,7 +67,8 @@ class Audio_List_Public {
 
 	    $sermondate = isset($atts['sermondate']) ? sanitize_text_field($atts['sermondate']) : '';
       $type = isset($atts['type']) ? sanitize_text_field($atts['type']) : '';
-      $url = isset($atts['url']) ? sanitize_text_field($atts['url']) : '';
+      $series = isset($atts['series']) ? sanitize_text_field($atts['series']) : '';
+      $url = isset($atts['url']) ? esc_url($atts['url']) : '';
       $style = isset($atts['style']) ? sanitize_text_field($atts['style']) : '';
       $id = isset($atts['id']) ? sanitize_text_field($atts['id']) : '';
 
@@ -79,6 +81,11 @@ class Audio_List_Public {
 	        $query_params[] = $sermondate;
 	    }
 
+	    if (!empty($series)) {
+	        $where_conditions[] = "series = %s";
+	        $query_params[] = $series;
+	    }
+
 	    if (!empty($type)) {
 	        $where_conditions[] = "type = %s";
 	        $query_params[] = $type;
@@ -86,35 +93,48 @@ class Audio_List_Public {
 
 	    $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
 
-	    $query = $wpdb->prepare("SELECT * FROM $table_name $where_clause ORDER BY sermondate ASC LIMIT 2000", $query_params);
+	    $query = $wpdb->prepare("SELECT id, sermondate, type, section, series, audiofile, note, topic, series, speaker FROM $table_name $where_clause ORDER BY sermondate ASC LIMIT 1000", $query_params);
 
 	    $results = $wpdb->get_results($query);
 
-	    $output = '<ul>';
-	    foreach ($results as $result) {
-	    	  $section = empty($result->section) ? '<br/>' . $result->type . '<br/>' : '<br/>'.$result->type. ': <span>'. $result->section .'</span><br/>' ;
-	    	  $src = $url . $result->audiofile;
-          $filenames = explode('.', $result->audiofile);
-          $filename = array_shift($filenames);
-          $audio_id = $id . $filename;
+			if ($results === false) {  // Error handling: Output an error message with the database error
+			    return '<p>Error retrieving audio list: ' . esc_html($wpdb->last_error) . '</p>';
+			}
 
-          $output .= <<<EOD
-					<p>
-					  <a id="$audio_id"></a>
-					</p>
-					<li>
-					  $result->sermondate &nbsp; $result->topic
-					  $section
-					  $result->speaker
-					  <br/>
-						<audio style="$style" preload="none" controls>
-						  <source src="$src" type="audio/mpeg">
-						  Your browser doesn't support the audio.
-						</audio>
-					</li>
-					EOD;
-	    }
-	    $output .= '</ul>';
+			if (empty($results)) {
+				  $output = '<p>No audio list available given the conditions: ' . json_encode($atts, JSON_UNESCAPED_SLASHES) . '</p>';
+			} else {
+			    $output = '<ul>';
+			    foreach ($results as $result) {
+			    	  $src = htmlspecialchars($url . $result->audiofile);
+		          $filenames = explode('.', $result->audiofile);
+		          $filename = array_shift($filenames);
+		          $audio_id = htmlspecialchars($id . $filename);
+		          $li = empty($result->note) ? '<li>' : '<li title="'. htmlspecialchars($result->note) .'">';
+		          $sermondate = esc_html($result->sermondate);
+		          $topic = esc_html($result->topic);
+		          $series = empty($result->series) ? '' : '&nbsp; &nbsp;' . esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
+		          $speaker = esc_html($result->speaker);
+			    	  $section = empty($result->section) ? '<br/>' . esc_html($result->type) . '<br/>' : '<br/>'. esc_html($result->type) . ': <span>'. esc_html($result->section) .'</span><br/>' ;
+
+		          $output .= <<<EOD
+							<p>
+							  <a id="$audio_id"></a>
+							</p>
+							$li
+							  $sermondate &nbsp; $topic
+							  $section
+							  $series $speaker
+							  <br/>
+								<audio style="$style" preload="none" controls>
+								  <source src="$src" type="audio/mpeg">
+								  Your browser doesn't support the audio.
+								</audio>
+							</li>
+							EOD;
+			    }
+			    $output .= '</ul>';
+			}
 	    return $output;
 	}
 
