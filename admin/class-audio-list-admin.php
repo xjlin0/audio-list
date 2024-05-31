@@ -395,7 +395,9 @@ class Audio_List_Admin {
             $klass = false !== strpos($message, 'successfully') ? 'notice-success' : 'notice-error';
             ?>
             <div class="notice <?php echo esc_attr($klass); ?> is-dismissible">
-                <?php echo wp_kses_post($message); ?>
+				<p>
+					<?php echo wp_kses_post($message); ?>
+				</p>
             </div>
             <?php
             delete_transient('custom_audio_list_message');
