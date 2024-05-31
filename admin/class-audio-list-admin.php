@@ -79,19 +79,24 @@ class Audio_List_Admin {
                         <th>主題/系列(Topic & series)</th>
                         <th>經節(Section)</th>
                         <th>類型/地點 (Type & location)</th>
-                        <th>選取(Action)</th>
+                        <th>操作(Operation)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($audio_list as $audio) : ?>
-                        <tr title="<?php echo(esc_attr($audio->remark)); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough'); ?>">
+                        <tr class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough inactive'); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo esc_html($audio->topic). ' ' . esc_html($audio->series); ?></td>
                             <td><?php echo esc_html($audio->section); ?></td>
                             <td><?php echo esc_html($audio->type) . ' ' . esc_html($audio->location); ?></td>
                             <td>
-                                <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-primary red'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Select</a>
+                                <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-primary red'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Edit</a>
+					            <?php if (!empty($audio->remark)) : ?>
+									<button class="button button-secondary" title="<?php echo(esc_attr($audio->remark)); ?>" onclick="alert('<?php echo(nl2br(esc_js($audio->remark))); ?>')">
+										Remark
+									</button>
+						        <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
