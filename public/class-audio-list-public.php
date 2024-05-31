@@ -93,7 +93,7 @@ class Audio_List_Public {
 
 	    $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
 
-	    $query = $wpdb->prepare("SELECT id, sermondate, type, section, series, audiofile, note, topic, series, speaker FROM $table_name $where_clause ORDER BY sermondate ASC LIMIT 1000", $query_params);
+	    $query = $wpdb->prepare("SELECT id, sermondate, type, section, series, audiofile, note, topic, series, speaker FROM $table_name $where_clause ORDER BY sermondate DESC", $query_params);
 
 	    $results = $wpdb->get_results($query);
 
