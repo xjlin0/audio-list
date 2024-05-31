@@ -113,7 +113,7 @@ class Audio_List_Public {
 		          $li = empty($result->note) ? '<li>' : '<li title="'. htmlspecialchars($result->note) .'">';
 		          $sermondate = esc_html($result->sermondate);
 		          $topic = esc_html($result->topic);
-		          $series = empty($result->series) ? '' : '&nbsp; &nbsp;' . esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
+		          $series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
 		          $speaker = esc_html($result->speaker);
 			    	  $section = empty($result->section) ? '<br/>' . esc_html($result->type) . '<br/>' : '<br/>'. esc_html($result->type) . ': <span>'. esc_html($result->section) .'</span><br/>' ;
 

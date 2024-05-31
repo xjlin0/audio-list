@@ -64,7 +64,7 @@ class Audio_List_Admin {
 
     public function custom_select_audio_page() {
         global $wpdb;
-        $audio_list = $wpdb->get_results("SELECT id, activeFlag, sermondate, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
+        $audio_list = $wpdb->get_results("SELECT id, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
 
         ?>
         <div class="wrap">
@@ -76,9 +76,9 @@ class Audio_List_Admin {
                     <tr>
                         <th>日期(Date)</th>
                         <th>講員(Speaker)</th>
-                        <th>主題(Topic)</th>
+                        <th>主題/系列(Topic & series)</th>
                         <th>經節(Section)</th>
-                        <th>類型地點 (Type & location)</th>
+                        <th>類型/地點 (Type & location)</th>
                         <th>選取(Action)</th>
                     </tr>
                 </thead>
@@ -87,7 +87,7 @@ class Audio_List_Admin {
                         <tr title="<?php echo(esc_attr($audio->remark)); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough'); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
-                            <td><?php echo esc_html($audio->topic); ?></td>
+                            <td><?php echo esc_html($audio->topic). ' ' . esc_html($audio->series); ?></td>
                             <td><?php echo esc_html($audio->section); ?></td>
                             <td><?php echo esc_html($audio->type) . ' ' . esc_html($audio->location); ?></td>
                             <td>
@@ -113,12 +113,7 @@ class Audio_List_Admin {
         <div class="wrap">
             <h1><?php echo get_bloginfo('description'); ?></h1>
             <h2>Hello! (WordPress Site Login)</h2>
-            <?php if (get_transient('custom_audio_list_message')) : ?>
-                <div class="notice notice-success is-dismissible">
-                    <p><?php echo get_transient('custom_audio_list_message'); ?></p>
-                </div>
-                <?php delete_transient('custom_audio_list_message'); ?>
-            <?php endif; ?>
+            <br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=custom-audio-list'); ?>'">1.新增證道錄音資料 (Create sermon record)</button>
             <br><br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=select-audio'); ?>'">2.修改證道錄音資料 (Update sermon record)</button>
@@ -289,7 +284,7 @@ class Audio_List_Admin {
 							</tr>
 						</tbody>
 				    </table>
-	                <input class="button button-primary" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
+	                <input class="button button-primary" onClick="this.form.submit(); this.disabled=true; this.value='Submitting…'; " type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
 	                <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
 			    </form>
 	            <?php if ($audio_id) : ?>
@@ -327,8 +322,8 @@ class Audio_List_Admin {
             $series = html_entity_decode(sanitize_text_field($_POST['series']));
             $audiofile = html_entity_decode(sanitize_text_field($_POST['audiofile']));
             $bibleID = intval($_POST['bibleID']);
-            $message = 'Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
-
+            $link = '<a href="' . admin_url('admin.php?page=custom-audio-list&id=');
+            $message = '">Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
 	        if (isset($_POST['operation']) && $audio_id) {  // Perform soft delete (set activeFlag to false) and exit
             	$operation = sanitize_text_field($_POST['operation']);
 	            $result = $wpdb->update(
@@ -341,7 +336,7 @@ class Audio_List_Admin {
 	            );
 
 	            if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
-	                set_transient('custom_audio_list_message', $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.'), 30);
+	                set_transient('custom_audio_list_message', $link . $audio_id . $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.') . '</a>', 30);
 	                wp_redirect(admin_url('admin.php?page=select-audio'));  // Redirect to the plugin root admin URL
 	                exit;
 	            } else {  // Display error message
@@ -359,7 +354,7 @@ class Audio_List_Admin {
 			    'type' => $type,
 			    'remark' => trim($remark),
 			    'series' => trim($series),
-			    'note' => trim($note),
+			    'note' => empty($note) ? null : trim($note),
 			    'audiofile' => trim($audiofile),
 			    'bibleID' => $bibleID,
 			    'updatedBy' => $current_user->user_login
@@ -379,15 +374,14 @@ class Audio_List_Admin {
 			}
 
             if ($result !== false) {  // Set a transient message to display after redirect
-                set_transient('custom_audio_list_message', $message . ($audio_id ? ' successfully updated.' : ' successfully added.'), 30);  // Redirect to the plugin root admin URL
+                set_transient('custom_audio_list_message', ($audio_id ? $link . $audio_id . $message . ' successfully updated.' : $link . $wpdb->insert_id . $message . ' successfully added.') . '</a>', 30);  // Redirect to the plugin root admin URL
                 wp_redirect(admin_url('admin.php?page=audio-list-admin'));
                 exit;
-            } else {  // Display error message
-                echo '<div class="notice notice-error is-dismissible"><p>Failed to ' . ($audio_id ? 'update' : 'add') . ' audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
+            } else {  // Display error message upon db write error
+                echo '<div class="notice notice-error is-dismissible"><p>Failed to ' . ($audio_id ? 'update' : 'add') . ' audio record. Error: ' . esc_html($wpdb->last_error) . '</p><p>Please check the data and save again.</p></div>';
             }
-        } else {
-            error_log("missing nonce_field for CSRF token verification");
-            echo '<div class="notice notice-error is-dismissible"><p>Security check failed since there is no CSRF token. Please try again.</p></div>';
+        } else {  // Display error message for missing nonce_field for CSRF token verification
+            echo '<div class="notice notice-error is-dismissible"><p>Security check failed for missing CSRF token. Please try again.</p></div>';
         }
     }
 
@@ -396,7 +390,7 @@ class Audio_List_Admin {
             $klass = false !== strpos($message, 'successfully') ? 'notice-success' : 'notice-error';
             ?>
             <div class="notice <?php echo esc_attr($klass); ?> is-dismissible">
-                <p><?php echo $message; ?></p>
+                <?php echo wp_kses_post($message); ?>
             </div>
             <?php
             delete_transient('custom_audio_list_message');
