@@ -36,11 +36,12 @@ class Audio_List_Admin {
 
     public function add_plugin_menu_pages() {
         add_menu_page(
-            'Audio List',
-            'Audio List',
-            'manage_options',
-            'audio-list-admin',
-            array($this, 'audio_list_admin_page')
+            'Audio List',            // Page title
+            'Audio List',            // Menu title
+            'manage_options',        // Capability required to access the menu
+            'audio-list-admin',      // Menu slug
+            array($this, 'audio_list_admin_page'),  // Callback function to display the menu page
+            'dashicons-format-audio' // Icon URL or WordPress Dashicon class
         );
 
         add_submenu_page(
