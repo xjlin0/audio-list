@@ -61,7 +61,8 @@ class Audio_List_Public {
 	        'type' => '',
 	        'series' => '',
 	        'url' => '',
-	        'style' => '',
+	        'audio_style' => '',
+	        'stripe_style' => '',
 	        'id' => ''
 	    ), $atts);
 
@@ -69,8 +70,9 @@ class Audio_List_Public {
       $type = isset($atts['type']) ? sanitize_text_field($atts['type']) : '';
       $series = isset($atts['series']) ? sanitize_text_field($atts['series']) : '';
       $url = isset($atts['url']) ? esc_url($atts['url']) : '';
-      $style = isset($atts['style']) ? sanitize_text_field($atts['style']) : '';
+      $audioStyle = isset($atts['audio_style']) ? sanitize_text_field($atts['audio_style']) : '';
       $id = isset($atts['id']) ? sanitize_text_field($atts['id']) : '';
+      $stripeStyle = isset($atts['stripe_style']) ? sanitize_text_field($atts['stripe_style']) : '';
 
 	    $table_name = $wpdb->prefix . 'audio_list';
 		  $where_conditions = array('activeFlag = "Active"');
@@ -105,32 +107,34 @@ class Audio_List_Public {
 				  $output = '<p>No audio list available given the conditions: ' . json_encode($atts, JSON_UNESCAPED_SLASHES) . '</p>';
 			} else {
 			    $output = '<ul>';
-			    foreach ($results as $result) {
-			    	  $src = htmlspecialchars($url . $result->audiofile);
-		          $filenames = explode('.', $result->audiofile);
-		          $filename = array_shift($filenames);
-		          $audio_id = htmlspecialchars($id . $filename);
-		          $li = empty($result->note) ? '<li>' : '<li title="'. htmlspecialchars($result->note) .'">';
-		          $sermondate = esc_html($result->sermondate);
-		          $topic = esc_html($result->topic);
-		          $series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
-		          $speaker = esc_html($result->speaker);
-			    	  $section = empty($result->section) ? '<br/>' . esc_html($result->type) . '<br/>' : '<br/>'. esc_html($result->type) . ': <span>'. esc_html($result->section) .'</span><br/>' ;
+			    foreach ($results as $index => $result) {
+							$src = htmlspecialchars($url . $result->audiofile);
+							$filenames = explode('.', $result->audiofile);
+							$filename = array_shift($filenames);
+							$audio_id = htmlspecialchars($id . $filename);
+							$liTitleWithoutEnd = empty($result->note) ? '<li' : '<li title="'. htmlspecialchars($result->note) .'"';
+              $li = $liTitleWithoutEnd . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
+							$sermondate = esc_html($result->sermondate);
+							$topic = esc_html($result->topic);
+							$series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
+							$speaker = esc_html($result->speaker);
+							$section = empty($result->section) ? '<br/>' . esc_html($result->type) . '<br/>' : '<br/>'. esc_html($result->type) . ': <span>'. esc_html($result->section) .'</span><br/>' ;
 
-		          $output .= <<<EOD
-							<p>
-							  <a id="$audio_id"></a>
-							</p>
-							$li
-							  $sermondate &nbsp; $topic
-							  $section
-							  $series $speaker
-							  <br/>
-								<audio style="$style" preload="none" controls>
-								  <source src="$src" type="audio/mpeg">
-								  Your browser doesn't support the audio.
-								</audio>
-							</li>
+							$output .= <<<EOD
+								<p>
+									<a id="$audio_id"></a>
+								</p>
+								<span>$stripeStyle</span>
+								$li
+									$sermondate &nbsp; $topic
+									$section
+									$series $speaker
+									<br/>
+									<audio style="$audioStyle" preload="none" controls>
+										<source src="$src" type="audio/mpeg">
+										Your browser doesn't support the audio.
+									</audio>
+								</li>
 							EOD;
 			    }
 			    $output .= '</ul>';

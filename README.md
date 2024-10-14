@@ -14,7 +14,7 @@ A Wordpress plug-in for showing players for audio files in the remote folders, b
 
 It can display HTML5 players of all audio listed in the database. In Post or Pages, please insert short codes like this:
 ```
-[audio-list id='1' sermondate='2024%' type='regular' style='width: 80%; min-width:100px url='https://host.server.com/org-name/path/2024/']
+[audio-list id='1' sermondate='2024%' type='regular' audio_style='width: 80%; min-width:100px stripe_style='background-color: #E8E8E8;' url='https://host.server.com/org-name/path/2024/']
 ```
 `sermondate%` (with the percent symbol at the end) and `type` are for filtering rows from `wp_audio_list` table in the Wordpress database.  It will be rendered as multiple players with the style supplied.  The player will get the file `url` from url specified with the value of `audiofile` from database. If there are multiple audio-list short codes, please add `id=1`, `id=2`, etc so that the id of the each player won't collide. If there is only one audio-list short code, id is not required.
 
@@ -49,7 +49,7 @@ There's database table name change from the previous draft code, please change S
 
 ## local development using Wordpress in docker-compose and mysql in host
 
-While [Wazoo's docker-compose](https://youtu.be/gEceSAJI_3s) is great for everything using docker-compose, here is yet another docker-compose.yml if you'd like to develop Wordpress plug-in in docker-compose with mysql in local rather than in docker.  Just `docker-compose up` and you will see `html` folder shows up in the folder of `docker-compose.yml`:
+While [Wazoo's docker-compose](https://youtu.be/gEceSAJI_3s) is great for everything using docker-compose, here is yet another docker-compose.yml if you'd like to develop Wordpress plug-in in docker-compose with mysql in local rather than in docker.  Just `docker compose up` and you will see `html` folder shows up in the folder of `docker-compose.yml`:
 
 ```yaml
 version: "3.8"
