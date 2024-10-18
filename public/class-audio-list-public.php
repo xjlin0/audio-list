@@ -113,7 +113,7 @@ class Audio_List_Public {
 							$filename = array_shift($filenames);
 							$audio_id = htmlspecialchars($id . $filename);
 							$liTitleWithoutEnd = empty($result->note) ? '<li' : '<li title="'. htmlspecialchars($result->note) .'"';
-              $li = $liTitleWithoutEnd . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
+							$li = $liTitleWithoutEnd . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
 							$sermondate = esc_html($result->sermondate);
 							$topic = esc_html($result->topic);
 							$series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
@@ -124,7 +124,7 @@ class Audio_List_Public {
 								<p>
 									<a id="$audio_id"></a>
 								</p>
-								<span>$stripeStyle</span>
+
 								$li
 									$sermondate &nbsp; $topic
 									$section

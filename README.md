@@ -13,10 +13,15 @@ A Wordpress plug-in for showing players for audio files in the remote folders, b
 ## Description
 
 It can display HTML5 players of all audio listed in the database. In Post or Pages, please insert short codes like this:
+```js
+[audio-list id='1'
+            sermondate='2024%'
+            type='regular'
+            audio_style='width: 80%; min-width:100px'
+            stripe_style='background-color: #E8E8E8;'
+            url='https://host.server.com/org-name/path/2024/']
 ```
-[audio-list id='1' sermondate='2024%' type='regular' audio_style='width: 80%; min-width:100px stripe_style='background-color: #E8E8E8;' url='https://host.server.com/org-name/path/2024/']
-```
-`sermondate%` (with the percent symbol at the end) and `type` are for filtering rows from `wp_audio_list` table in the Wordpress database.  It will be rendered as multiple players with the style supplied.  The player will get the file `url` from url specified with the value of `audiofile` from database. If there are multiple audio-list short codes, please add `id=1`, `id=2`, etc so that the id of the each player won't collide. If there is only one audio-list short code, id is not required.
+`sermondate%` (with the percent symbol at the end) and `type` are for filtering rows from `wp_audio_list` table in the Wordpress database.  It will be rendered as multiple players with the audio_style supplied.  The player will get the file `url` from url specified with the value of `audiofile` from database. Optionally the row stripe can be added via `stripe_style`. If there are multiple audio-list short codes, please add `id=1`, `id=2`, etc so that the id of the each player won't collide. If there is only one audio-list short code, id is not required.
 
 In the Wordpress Admin dashboard, Contributors will find side bar menu item "Audio List" where you can add meta data for each audio or select and update each audio.  The soft deleted audio won't be shown on the Wordpress frontend.
 
