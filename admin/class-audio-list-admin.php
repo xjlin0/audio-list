@@ -260,8 +260,7 @@ class Audio_List_Admin {
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
-							        <input type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>" required>
-							        <span class="fielderror">*</span>
+							        <input type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
 							    </td>
 							</tr>
 							<tr>
@@ -288,9 +287,17 @@ class Audio_List_Admin {
 							        <textarea id="note" maxlength="21845" name="note" cols="50" rows="6"><?php echo esc_attr($note_value); ?></textarea>
 							    </td>
 							</tr>
+							<tr>
+								<td align="right">
+							        狀態(Status):
+							    </td>
+							    <td>
+							        <?php echo  $audio->activeFlag; ?>
+							    </td>
+							</tr>
 						</tbody>
 				    </table>
-	                <input class="button button-primary" onClick="this.form.submit(); this.disabled=true; this.value='Submitting…'; " type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
+	                <input class="button button-primary" onClick="if(confirm('Are you sure to submit?')){this.form.submit(); this.disabled=true; this.value='Submitting…';} else {return false;}" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
 	                <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
 			    </form>
 	            <?php if ($audio_id) : ?>
@@ -298,12 +305,12 @@ class Audio_List_Admin {
 			            <input type="hidden" name="action" value="custom_audio_list_form_submit">
 			            <?php wp_nonce_field('my_action', 'csrf_token'); ?>
 			            <input type="hidden" name="audio_id" value="<?php echo $audio_id; ?>" readonly>
-			            <input type="hidden" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" readonly>
-			            <input type="hidden" name="type" value="<?php echo esc_attr($type_value); ?>" readonly>
-			            <input type="hidden" name="speaker" value="<?php echo esc_attr($speaker_value); ?>" readonly>
-			            <input type="hidden" name="topic" value="<?php echo esc_attr($topic_value); ?>" readonly>
+			            <input type="hidden" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" comment="for transient message" readonly>
+			            <input type="hidden" name="type" value="<?php echo esc_attr($type_value); ?>" comment="for transient message" readonly>
+			            <input type="hidden" name="speaker" value="<?php echo esc_attr($speaker_value); ?>" comment="for transient message" readonly>
+			            <input type="hidden" name="topic" value="<?php echo esc_attr($topic_value); ?>" comment="for transient message" readonly>
 			            <input type="hidden" name="operation" value="<?php echo esc_attr($operation); ?>" readonly>
-			            <input onclick="return confirm('Are you sure to <?php echo esc_attr($operation); ?>?')" class="button button-primary red" type="submit" value="<?php echo esc_attr($operation); ?>">
+			            <input onclick="return confirm('Are you sure to <?php echo esc_attr($operation); ?>? (All updates in the form will NOT be saved/updated)')" class="button button-primary red" type="submit" value="<?php echo esc_attr($operation); ?>">
 				    </form>
 		        <?php endif; ?>
 		    </div>
@@ -326,7 +333,7 @@ class Audio_List_Admin {
             $remark = html_entity_decode(sanitize_text_field($_POST['remark']));
             $note = html_entity_decode(sanitize_text_field($_POST['note']));
             $series = html_entity_decode(sanitize_text_field($_POST['series']));
-            $audiofile = html_entity_decode(sanitize_text_field($_POST['audiofile']));
+            $audiofile = (!empty($_POST['audiofile']) && trim($_POST['audiofile'])) ? html_entity_decode(sanitize_text_field($_POST['audiofile'])) : null;
             $bibleID = intval($_POST['bibleID']);
             $link = '<a href="' . admin_url('admin.php?page=custom-audio-list&id=');
             $message = '">Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
@@ -361,7 +368,7 @@ class Audio_List_Admin {
 			    'remark' => trim($remark),
 			    'series' => trim($series),
 			    'note' => empty($note) ? null : trim($note),
-			    'audiofile' => trim($audiofile),
+			    'audiofile' => empty($audiofile) ? null : trim($audiofile),
 			    'bibleID' => $bibleID,
 			    'updatedBy' => $current_user->user_login
 			);
