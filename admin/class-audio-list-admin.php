@@ -118,13 +118,13 @@ class Audio_List_Admin {
         ?>
         <div class="wrap">
             <h1><?php echo get_bloginfo('description'); ?></h1>
-            <h2>Hello! (WordPress Site Login)</h2>
+            <h2>Hello! <?php  echo wp_get_current_user()->display_name; ?></h2>
             <br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=custom-audio-list'); ?>'">1.新增證道錄音資料 (Create sermon record)</button>
             <br><br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=select-audio'); ?>'">2.修改證道錄音資料 (Update sermon record)</button>
             <br><br>
-            <button class="button button-primary orange" onclick="location.href='<?php echo wp_logout_url(admin_url()); ?>'">登出系統 Log Out</button>
+            <button class="button button-primary orange" onclick="if(confirm('Are you sure to log out?')){location.href='<?php echo wp_logout_url(admin_url()); ?>'} else {return false;}">登出系統 Log Out</button>
         </div>
         <?php
     }
@@ -260,7 +260,8 @@ class Audio_List_Admin {
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
-							        <input type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
+							        <input placeholder="Please fill 請填寫!!" title="For the opration we can't make this required but please fill it when possible. 為作業方便此欄不能設為必須, 但請盡量填寫." type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
+							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
 							<tr>
@@ -292,7 +293,7 @@ class Audio_List_Admin {
 							        狀態(Status):
 							    </td>
 							    <td>
-							        <?php echo  $audio->activeFlag; ?>
+							        <?php echo $audio_id ? $audio->activeFlag : 'New'; ?>
 							    </td>
 							</tr>
 						</tbody>
