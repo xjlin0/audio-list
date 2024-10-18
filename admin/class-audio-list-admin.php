@@ -65,11 +65,11 @@ class Audio_List_Admin {
 
     public function custom_select_audio_page() {
         global $wpdb;
-        $audio_list = $wpdb->get_results("SELECT id, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
-
+        $audioList = $wpdb->get_results("SELECT id, audiofile, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
         ?>
         <div class="wrap">
-            <h1>修改錄音證道-選取證道錄音</h1>
+            <h1>Modify audio data - select an audio 修改錄音證道-選取證道錄音</h1>
+            <h2>Deleted audios will be striked out and won't be shown in the frontend; records without filenames will be highlighted and players won't be shown in the frontend. 已刪除紀錄將被劃掉且不在前台顯示; 無檔名紀錄將以黃色標示且前台不顯示播放器</h2>
             <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
             <br><br>
             <table class="wp-list-table widefat fixed striped">
@@ -84,11 +84,16 @@ class Audio_List_Admin {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($audio_list as $audio) : ?>
-                        <tr class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough inactive'); ?>">
+                    <?php foreach ($audioList as $audio) : 
+                    $topicAndSeries = esc_html($audio->topic). ' ' . esc_html($audio->series);
+                    $trStyle = '';
+                    if (empty($audio->audiofile)) {
+                        $topicAndSeries = '(Unavailable) ' . $topicAndSeries;
+                    }?>
+                        <tr class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough inactive'); ?>" style="<?php echo(empty($audio->audiofile) ? 'background-color: Khaki;' : ''); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
-                            <td><?php echo esc_html($audio->topic). ' ' . esc_html($audio->series); ?></td>
+                            <td><?php echo $topicAndSeries; ?></td>
                             <td><?php echo esc_html($audio->section); ?></td>
                             <td><?php echo esc_html($audio->type) . ' ' . esc_html($audio->location); ?></td>
                             <td>
@@ -170,7 +175,7 @@ class Audio_List_Admin {
         ?>
         <div class="wrap">
             <h1><?php echo $audio_id ? 'Update Sermon Record 修改' : 'Create Sermon Record 新增'; ?>錄音證道</h1>
-            <h2>Editor: <?php echo $current_user->user_login; ?>(WordPress Site Login)</h2>
+            <h2>Editor: <?php echo $current_user->user_login; ?></h2>
             <div class="form-container">
                 <form id="main_form" method="post" action="">
 	                <input type="hidden" name="action" value="custom_audio_list_form_submit">
@@ -260,7 +265,7 @@ class Audio_List_Admin {
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
-							        <input placeholder="Please fill 請填寫!!" title="For the opration we can't make this required but please fill it when possible. 為作業方便此欄不能設為必須, 但請盡量填寫." type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
+							        <input placeholder="Please fill 請填寫!!" title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)" type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
 							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
