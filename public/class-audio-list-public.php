@@ -119,6 +119,16 @@ class Audio_List_Public {
 							$series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
 							$speaker = esc_html($result->speaker);
 							$section = empty($result->section) ? '<br/>' . esc_html($result->type) . '<br/>' : '<br/>'. esc_html($result->type) . ': <span>'. esc_html($result->section) .'</span><br/>' ;
+							if ($result->audiofile) {
+								$audioPlayer = <<<EOT
+									<audio style="$audioStyle" preload="none" controls>
+										<source src="$src" type="audio/mpeg">
+										Your browser doesn't support the audio.
+									</audio>
+								EOT;
+							} else {
+								$audioPlayer = '<span>Unavailable 無檔案</span>';
+							}
 
 							$output .= <<<EOD
 								<p>
@@ -130,10 +140,7 @@ class Audio_List_Public {
 									$section
 									$series $speaker
 									<br/>
-									<audio style="$audioStyle" preload="none" controls>
-										<source src="$src" type="audio/mpeg">
-										Your browser doesn't support the audio.
-									</audio>
+									$audioPlayer
 								</li>
 							EOD;
 			    }
