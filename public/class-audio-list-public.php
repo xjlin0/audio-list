@@ -104,7 +104,8 @@ class Audio_List_Public {
 			}
 
 			if (empty($results)) {
-				  $output = '<p>No audio list available given the conditions: ' . json_encode($atts, JSON_UNESCAPED_SLASHES) . '</p>';
+				  error_log( 'No audio list row available with given conditions: ' . json_encode($atts, JSON_UNESCAPED_SLASHES));
+				  $output = '<li>No audio available 查無資料.</li>';
 			} else {
 			    $output = '<ul>';
 			    foreach ($results as $index => $result) {
