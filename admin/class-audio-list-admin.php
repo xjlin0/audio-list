@@ -90,7 +90,7 @@ class Audio_List_Admin {
                     if (empty($audio->audiofile)) {
                         $topicAndSeries = '(Unavailable) ' . $topicAndSeries;
                     }?>
-                        <tr class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough inactive'); ?>" style="<?php echo(empty($audio->audiofile) ? 'background-color: Khaki;' : ''); ?>">
+                        <tr id="audio-list-<?php echo($audio->id); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough inactive'); ?>" style="<?php echo(empty($audio->audiofile) ? 'background-color: Khaki;' : ''); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo $topicAndSeries; ?></td>
@@ -356,7 +356,7 @@ class Audio_List_Admin {
 
 	            if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
 	                set_transient('custom_audio_list_message', $link . $audio_id . $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.') . '</a>', 30);
-	                wp_redirect(admin_url('admin.php?page=select-audio'));  // Redirect to the plugin root admin URL
+	                wp_redirect(admin_url('admin.php?page=select-audio').'#audio-list-'.$audio_id);  // Redirect to the plugin root admin URL
 	                exit;
 	            } else {  // Display error message
 	                echo '<div class="notice notice-error is-dismissible"><p>Failed to alter audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
@@ -394,7 +394,7 @@ class Audio_List_Admin {
 
             if ($result !== false) {  // Set a transient message to display after redirect
                 set_transient('custom_audio_list_message', ($audio_id ? $link . $audio_id . $message . ' successfully updated.' : $link . $wpdb->insert_id . $message . ' successfully added.') . '</a>', 30);  // Redirect to the plugin root admin URL
-                wp_redirect(admin_url('admin.php?page=audio-list-admin'));
+                wp_redirect(admin_url('admin.php?page=audio-list-admin').'#audio-list-'.$audio_id);
                 exit;
             } else {  // Display error message upon db write error
                 echo '<div class="notice notice-error is-dismissible"><p>Failed to ' . ($audio_id ? 'update' : 'add') . ' audio record. Error: ' . esc_html($wpdb->last_error) . '</p><p>Please check the data and save again.</p></div>';
