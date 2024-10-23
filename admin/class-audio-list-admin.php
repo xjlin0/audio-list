@@ -66,6 +66,10 @@ class Audio_List_Admin {
     public function custom_select_audio_page() {
         global $wpdb;
         $audioList = $wpdb->get_results("SELECT id, audiofile, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
+        $params = array();
+        parse_str($_SERVER['QUERY_STRING'], $params);
+        $circle = $params['circle'] ?? null;
+
         ?>
         <div class="wrap">
             <h1>Modify audio data - select an audio 修改錄音證道-選取證道錄音</h1>
@@ -90,7 +94,7 @@ class Audio_List_Admin {
                     if (empty($audio->audiofile)) {
                         $topicAndSeries = '(Unavailable) ' . $topicAndSeries;
                     }?>
-                        <tr id="audio-list-<?php echo($audio->id); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough inactive'); ?>" style="<?php echo(empty($audio->audiofile) ? 'background-color: Khaki;' : ''); ?>">
+                        <tr id="audio-list-<?php echo($audio->id); ?>" class="<?php echo($audio->activeFlag === 'Active' ? '' : 'strikethrough inactive'); ?>" style="<?php echo((empty($audio->audiofile) ? 'background-color: Khaki;' : '').($circle === $audio->id ? 'box-shadow: inset 0 0 10px green;' : '')); ?>">
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo $topicAndSeries; ?></td>
@@ -340,7 +344,7 @@ class Audio_List_Admin {
             $note = html_entity_decode(sanitize_text_field($_POST['note']));
             $series = html_entity_decode(sanitize_text_field($_POST['series']));
             $audiofile = (!empty($_POST['audiofile']) && trim($_POST['audiofile'])) ? html_entity_decode(sanitize_text_field($_POST['audiofile'])) : null;
-            $bibleID = intval($_POST['bibleID']);
+            $bibleID = isset($_POST['bibleID']) ? intval($_POST['bibleID']) : 0;
             $link = '<a href="' . admin_url('admin.php?page=custom-audio-list&id=');
             $message = '">Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
 	        if (isset($_POST['operation']) && $audio_id) {  // Perform soft delete (set activeFlag to false) and exit
@@ -356,7 +360,8 @@ class Audio_List_Admin {
 
 	            if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
 	                set_transient('custom_audio_list_message', $link . $audio_id . $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.') . '</a>', 30);
-	                wp_redirect(admin_url('admin.php?page=select-audio').'#audio-list-'.$audio_id);  // Redirect to the plugin root admin URL
+	                $params = array('circle' => $audio_id );
+	                wp_redirect(admin_url('admin.php?page=select-audio&'.http_build_query($params)).'#audio-list-'.$audio_id);  // Redirect to the plugin root admin URL
 	                exit;
 	            } else {  // Display error message
 	                echo '<div class="notice notice-error is-dismissible"><p>Failed to alter audio record. Error: ' . esc_html($wpdb->last_error) . '</p></div>';
@@ -378,7 +383,7 @@ class Audio_List_Admin {
 			    'bibleID' => $bibleID,
 			    'updatedBy' => $current_user->user_login
 			);
-
+			$new_id = null;
 			if ($audio_id) {  // Update existing audio record
 			    $result = $wpdb->update(
 			        'wp_audio_list',
@@ -390,11 +395,13 @@ class Audio_List_Admin {
 			        'wp_audio_list',
 			        $data
 			    );
+			    $new_id=$wpdb->insert_id;
 			}
 
             if ($result !== false) {  // Set a transient message to display after redirect
-                set_transient('custom_audio_list_message', ($audio_id ? $link . $audio_id . $message . ' successfully updated.' : $link . $wpdb->insert_id . $message . ' successfully added.') . '</a>', 30);  // Redirect to the plugin root admin URL
-                wp_redirect(admin_url('admin.php?page=audio-list-admin').'#audio-list-'.$audio_id);
+                set_transient('custom_audio_list_message', ($audio_id ? $link . $audio_id . $message . ' successfully updated.' : $link . $new_id . $message . ' successfully added.') . '</a>', 30);  // Redirect to the plugin root admin URL
+                $params = array('circle' => $audio_id ? $audio_id : $new_id );
+                wp_redirect(admin_url('admin.php?page=select-audio&'.http_build_query($params)).'#audio-list-'.($audio_id ? $audio_id : $new_id));
                 exit;
             } else {  // Display error message upon db write error
                 echo '<div class="notice notice-error is-dismissible"><p>Failed to ' . ($audio_id ? 'update' : 'add') . ' audio record. Error: ' . esc_html($wpdb->last_error) . '</p><p>Please check the data and save again.</p></div>';
