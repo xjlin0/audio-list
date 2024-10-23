@@ -199,7 +199,7 @@ class Audio_List_Admin {
 							        日期 (mm/dd/yyyy):
 							    </td>
 							    <td>
-							        <input type="date" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required>
+							        <input type="date" onkeydown="return false" name="sermondate" value="<?php echo esc_attr($sermondate_value); ?>" required>
 							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
