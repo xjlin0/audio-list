@@ -73,6 +73,7 @@ services:
       WORDPRESS_DB_NAME: host_mysql_database_name
     volumes:
       - ./html:/var/www/html
+    command: /bin/bash -c "apt-get update && apt-get install -y git && apache2-foreground"
 ```
 
 Please also add the following lines in html/.htaccess to overcome PHP upload limit:
