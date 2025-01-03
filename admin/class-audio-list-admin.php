@@ -199,13 +199,16 @@ class Audio_List_Admin {
         $type_value = '';
         $remark_value = '';
         $note_value = '';
+        $content_value = '';
+        $url_value = '';
+        $link_value = '';
         $series_value = '';
         $audiofile_value = '';
         $bibleID_value = 0;
         $operation = '';
 
         if ($audio_id) {  // If audio ID is provided, fetch the data from the database
-            $audio = $wpdb->get_row($wpdb->prepare("SELECT sermondate, speaker, topic, section, location, type, remark, note, audiofile, bibleID, series, activeFlag FROM wp_audio_list WHERE id = %d", $audio_id));
+            $audio = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_audio_list WHERE id = %d", $audio_id));
             if ($audio) {  // Pre-fill form fields with fetched data
                 $sermondate_value = $audio->sermondate;
                 $speaker_value = $audio->speaker;
@@ -215,6 +218,9 @@ class Audio_List_Admin {
                 $type_value = $audio->type;
                 $remark_value = $audio->remark;
                 $note_value = $audio->note;
+                $content_value = $audio->content;
+                $url_value = $audio->url;
+                $link_value = $audio->link;
                 $audiofile_value = $audio->audiofile;
                 $bibleID_value = $audio->bibleID;
                 $series_value = $audio->series;
@@ -261,7 +267,7 @@ class Audio_List_Admin {
 							        講員(Speaker):
 							    </td>
 							    <td>
-							        <input type="text" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required>
+							        <input size="60" type="text" name="speaker" maxlength="255" value="<?php echo esc_attr($speaker_value); ?>" required>
 							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
@@ -270,7 +276,7 @@ class Audio_List_Admin {
 							        主題(Topic):
 							    </td>
 							    <td>
-							        <input type="text" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required>
+							        <input size="60" type="text" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required>
 							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
@@ -279,7 +285,7 @@ class Audio_List_Admin {
 							        經節(Section):
 							    </td>
 							    <td>
-							        <input type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
+							        <input size="60" type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
 							    </td>
 							</tr>
 							<tr>
@@ -287,7 +293,7 @@ class Audio_List_Admin {
 							        地點(Location):
 							    </td>
 							    <td>
-							        <input type="text" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required>
+							        <input size="60" type="text" maxlength="255" name="location" value="<?php echo esc_attr($location_value); ?>" required>
 							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
@@ -310,7 +316,7 @@ class Audio_List_Admin {
 							        系列名稱 (series):
 							    </td>
 							    <td>
-							        <input type="text" maxlength="45" name="series" value="<?php echo esc_attr($series_value); ?>">
+							        <input size="60" type="text" maxlength="45" name="series" value="<?php echo esc_attr($series_value); ?>">
 							    </td>
 							</tr>
 							<tr>
@@ -318,7 +324,7 @@ class Audio_List_Admin {
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
-							        <input placeholder="Please fill 請填寫!!" title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)" type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
+							        <input size="60" placeholder="Please fill 請填寫!!" title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)" type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
 							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
@@ -335,7 +341,7 @@ class Audio_List_Admin {
 							        內部備註(Internal remark):
 							    </td>
 							    <td>
-							        <textarea id="remark" maxlength="255" name="remark" cols="40" rows="5"><?php echo esc_attr($remark_value); ?></textarea>
+							        <textarea id="remark" maxlength="255" name="remark" cols="60" rows="5"><?php echo esc_attr($remark_value); ?></textarea>
 							    </td>
 							</tr>
 							<tr>
@@ -343,7 +349,31 @@ class Audio_List_Admin {
 							        公開註記(Public note):
 							    </td>
 							    <td>
-							        <textarea id="note" maxlength="21845" name="note" cols="50" rows="6"><?php echo esc_attr($note_value); ?></textarea>
+							        <textarea id="note" placeholder="abstract 摘要" maxlength="21845" name="note" cols="60" rows="6"><?php echo esc_attr($note_value); ?></textarea>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        內容(content):
+							    </td>
+							    <td>
+							        <textarea id="content" placeholder="transcript 逐字稿" maxlength="21845" name="note" cols="60" rows="5"><?php echo esc_attr($note_value); ?></textarea>
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        <a href="<?php echo(empty($url_value) ? '#' : esc_attr($url_value)); ?>">網址(url)</a>:
+							    </td>
+							    <td>
+							        <input type="text" size="60" placeholder="youtube url" maxlength="100" name="url" value="<?php echo esc_attr($url_value); ?>">
+							    </td>
+							</tr>
+							<tr>
+								<td align="right">
+							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">連結(link)</a>:
+							    </td>
+							    <td>
+							        <input type="text" size="60" placeholder="picture link 圖片連結" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
 							    </td>
 							</tr>
 							<tr>
@@ -390,10 +420,13 @@ class Audio_List_Admin {
         $type = sanitize_text_field($_POST['type']);
         $remark = html_entity_decode(sanitize_text_field($_POST['remark']));
         $note = html_entity_decode(sanitize_text_field($_POST['note']));
+        $content = html_entity_decode(sanitize_text_field($_POST['content']));
+        $url = html_entity_decode(sanitize_text_field($_POST['url']));
+        $link = html_entity_decode(sanitize_text_field($_POST['link']));
         $series = html_entity_decode(sanitize_text_field($_POST['series']));
         $audiofile = (!empty($_POST['audiofile']) && trim($_POST['audiofile'])) ? html_entity_decode(sanitize_text_field($_POST['audiofile'])) : null;
         $bibleID = isset($_POST['bibleID']) ? intval($_POST['bibleID']) : 0;
-        $link = '<a href="' . admin_url('admin.php?page=custom-audio-list&id=');
+        $prompt_link = '<a href="' . admin_url('admin.php?page=custom-audio-list&id=');
         $message = '">Audio List ' . $sermondate . ' ' . $type . ' ' . $speaker . ' ' . $topic;
         if (isset($_POST['operation']) && $audio_id) {  // Perform soft delete (set activeFlag to false) and exit
             $operation = sanitize_text_field($_POST['operation']);
@@ -407,7 +440,7 @@ class Audio_List_Admin {
             );
 
             if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
-                set_transient('custom_audio_list_message', $link . $audio_id . $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.') . '</a>', 30);
+                set_transient('custom_audio_list_message', $prompt_link . $audio_id . $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.') . '</a>', 30);
                 $params = array('circle' => $audio_id );
                 wp_redirect(admin_url('admin.php?page=select-audio&'.http_build_query($params)).'#audio-list-'.$audio_id);  // Redirect to the plugin root admin URL
                 exit;
@@ -427,6 +460,9 @@ class Audio_List_Admin {
 		    'remark' => trim($remark),
 		    'series' => trim($series),
 		    'note' => empty($note) ? null : trim($note),
+		    'content' => empty($content) ? null : trim($content),
+		    'url' => empty($url) ? null : trim($url),
+		    'link' => empty($link) ? null : trim($link),
 		    'audiofile' => empty($audiofile) ? null : trim($audiofile),
 		    'bibleID' => $bibleID,
 		    'updatedBy' => $current_user->user_login
