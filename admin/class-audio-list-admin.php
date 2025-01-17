@@ -189,9 +189,12 @@ class Audio_List_Admin {
 
     public function custom_audio_list_page() {
         global $wpdb;
+        $audio_prefix = 'https://s3-us-west-1.amazonaws.com/chinese-church/restructure_sermon/';
+        $audio_preview = '/hayward/sermon-';
         $current_user = wp_get_current_user();
         $audio_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $sermondate_value = date('Y-m-d');
+        $sermon_year = '';
         $speaker_value = '';
         $topic_value = '';
         $section_value = '';
@@ -222,6 +225,12 @@ class Audio_List_Admin {
                 $url_value = $audio->url;
                 $link_value = $audio->link;
                 $audiofile_value = $audio->audiofile;
+
+				if (!is_null($sermondate_value) && !empty(trim($sermondate_value))) {
+				    $potential_year = date('Y', strtotime($sermondate_value));
+				    $sermon_year = $potential_year > '2999' && !is_null($audiofile_value) && !empty(trim($audiofile_value)) ? substr($audiofile_value, 0, 4) : $potential_year;
+				}
+
                 $bibleID_value = $audio->bibleID;
                 $series_value = $audio->series;
                 $operation = $audio->activeFlag === 'Active' ? 'delete' : 'restore';
@@ -326,6 +335,19 @@ class Audio_List_Admin {
 							    <td>
 							        <input size="60" placeholder="Please fill 請填寫!!" title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)" type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
 							        <span class="fielderror">*</span>
+							    </td>
+							</tr>
+							<tr <?php echo esc_attr($audio ? '' : 'hidden'); ?>>
+								<td align="right">
+									<a href="<?php echo esc_attr($audio_preview . $sermon_year . ( $audiofile_value ? '/#' . substr($audiofile_value, 0, strrpos($audiofile_value, '.')) : '' )); ?>" target="_blank">
+							          試聽看 (Audio check):
+							        </a>
+							    </td>
+							    <td>
+									<audio preload="none" controls style="width: 100%;">
+									  <source src="<?php echo esc_attr($audio_prefix . $sermon_year . '/' . $audiofile_value); ?>" type="audio/mpeg">
+									Your browser does not support the audio element.
+									</audio>
 							    </td>
 							</tr>
 							<tr>
