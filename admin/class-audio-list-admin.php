@@ -39,7 +39,7 @@ class Audio_List_Admin {
         add_menu_page(
             'Audio List',            // Page title
             'Audio List',            // Menu title
-            'manage_options',        // Capability required to access the menu
+            'edit_posts',        // Capability required to access the menu: Subscribers cannot see it
             'audio-list-admin',      // Menu slug
             array($this, 'audio_list_admin_page'),  // Callback function to display the menu page
             'dashicons-format-audio' // Icon URL or WordPress Dashicon class
@@ -49,7 +49,7 @@ class Audio_List_Admin {
             'audio-list-admin',
             'Add New Audio',
             'Add New Audio',
-            'manage_options',
+            'edit_posts',
             'custom-audio-list',
             array($this, 'custom_audio_list_page')
         );
@@ -58,7 +58,7 @@ class Audio_List_Admin {
             'audio-list-admin',
             'Select Audio to Edit',
             'Update Existing Audio',
-            'manage_options',
+            'edit_posts',
             'select-audio',
             array($this, 'custom_select_audio_page')
         );
