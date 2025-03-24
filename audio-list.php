@@ -62,6 +62,7 @@ register_deactivation_hook( __FILE__, 'deactivate_audio_list' );
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
+require plugin_dir_path( __FILE__ ) . '/vendor/autoload.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-audio-list.php';
 
 /**
