@@ -32,7 +32,20 @@ class Audio_List_Admin {
     public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
-        $this->aws_handler = new AWS_Handler();
+        $this->aws_handler = null;
+
+        if (defined('AS3CF_SETTINGS') && !empty(AS3CF_SETTINGS)) {
+            $aws_settings = unserialize(AS3CF_SETTINGS);
+
+            if (isset($aws_settings['provider'], $aws_settings['access-key-id'], $aws_settings['secret-access-key'])) {
+                $this->aws_handler = new AWS_Handler();
+            } else {
+                error_log('AWS configuration is incomplete or invalid.');
+            }
+        } else {
+            error_log('AS3CF_SETTINGS is not defined in wp-config.php.');
+        }
+
         add_action('admin_menu', array($this, 'add_plugin_menu_pages'));
         add_action('admin_post_custom_audio_list_form_submit', array($this, 'process_audio_list_form_submission'));
         add_action('admin_init', array($this, 'handle_form_submission'));
@@ -348,8 +361,8 @@ class Audio_List_Admin {
                                     <span class="fielderror">*</span>
                                     <br>
                                     <input type="file" id="audio_file_select" accept="audio/*" style="display:none;">
-                                    <button type="button" class="button" onclick="document.getElementById('audio_file_select').click()">選擇文件上傳 (Select a file to upload)</button>
-                                    <span style="vertical-align: -webkit-baseline-middle;" id="upload_status"></span>
+                                    <button type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇文件上傳 (Select a file to upload)</button>
+                                    <span class="vertical-baseline-middle" id="upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
 							<tr id="audio-preview" <?php echo esc_attr(isset($audio) ? '' : 'hidden'); ?>>
@@ -444,12 +457,12 @@ class Audio_List_Admin {
         <script>
         const fileSelectButton = document.querySelector('button[onclick="document.getElementById(\'audio_file_select\').click()"]');
         const audioDataSubmitButton = document.querySelector('input[name="submit"]');
+        const statusDiv = document.getElementById('upload_status');
 
         const uploadFile = async function() {
             const file = document.getElementById('audio_file_select').files[0];
             const sermonDate = document.querySelector('input[name="sermondate"]').value;
             const year = sermonDate.split('-')[0];
-            const statusDiv = document.getElementById('upload_status');
             const audioPreviewTr = document.querySelector('tr#audio-preview');
 
             // Disable both buttons during upload
@@ -477,7 +490,7 @@ class Audio_List_Admin {
                         data = JSON.parse(text);  // Then parse it
                     } catch (e) {
                         console.error('JSON parse error:', e);
-                        throw new Error('Invalid server response format');
+                        throw new Error('Invalid server response format ' + text);
                     }
 
                     console.log('Parsed response:', data);
@@ -485,10 +498,10 @@ class Audio_List_Admin {
                     if (data.success) {
                         if (data.data.exists) {
                             if (!confirm('File already exists. Do you want to overwrite it?')) {
-                                statusDiv.textContent = 'Upload aborted';
+                                statusDiv.textContent = 'Upload aborted (file exists)';
                                 statusDiv.style.color = 'grey';
                                 fileSelectButton.disabled = false;
-                                return;
+                                return data;
                             }
                         }
                         
@@ -520,6 +533,7 @@ class Audio_List_Admin {
                             audioPreview.load();
                             const audioPreviewA = audioPreviewTr.querySelector('a');
                             audioPreviewA.href += year;
+                            return uploadResult;
                         } else {
                             throw new Error(uploadResult.data || 'Upload failed');
                         }
@@ -546,24 +560,29 @@ class Audio_List_Admin {
             const file = e.target.files[0];
             const sermonDate = document.querySelector('input[name="sermondate"]').value;
             const year = sermonDate.split('-')[0];
-
+            const previousFilename = document.getElementById('audiofile_input').value;
             if (file) {
                 document.getElementById('audiofile_input').value = file.name;
-                if (year && confirm(`Do you want to upload the file to ${year} folder?`)) {
-                    audioDataSubmitButton.disabled = true;
-                    uploadFile()
-                        .then(() => {
-                            console.log('executed uploadFile()');
-                        })
-                        .catch((error) => {
-                            console.error('An error occurred while calling uploadFile():', error);
-                        })
-                        .finally(() => {
-                            audioDataSubmitButton.disabled = false;
-                        });
-                } else {
+                setTimeout(() => {  // confirm() is a blocking operation stopping the above DOM alteration
+                    if (year && confirm(`Do you want to ${previousFilename ? 'replace ' + previousFilename + ' and ' : ''}upload the file ${file.name} to ${year} folder?`)) {
+                        audioDataSubmitButton.disabled = true;
+                        uploadFile()
+                            .then((result) => {
+                                console.log('executed uploadFile(), result: ', result);
+                            })
+                            .catch((error) => {
+                                console.error('An error occurred while calling uploadFile():', error);
+                            })
+                            .finally(() => {
+                                audioDataSubmitButton.disabled = false;
+                            });
+                    } else if (previousFilename) {
+                        document.getElementById('audiofile_input').value = previousFilename;
+                    } else {
+                        statusDiv.textContent = 'You chose not to upload the file';
+                    }
                     document.getElementById('audio_file_select').value = '';
-                }
+                }, 1)
             }
         });
         </script>
