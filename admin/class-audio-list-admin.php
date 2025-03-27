@@ -352,7 +352,7 @@ class Audio_List_Admin {
                                     <span style="vertical-align: -webkit-baseline-middle;" id="upload_status"></span>
 							    </td>
 							</tr>
-							<tr <?php echo esc_attr($audio ? '' : 'hidden'); ?>>
+							<tr id="audio-preview" <?php echo esc_attr(isset($audio) ? '' : 'hidden'); ?>>
 								<td align="right">
 									<a href="<?php echo esc_attr($audio_preview . $sermon_year . ( $audiofile_value ? '/#' . substr($audiofile_value, 0, strrpos($audiofile_value, '.')) : '' )); ?>" target="_blank">
 							          試聽看 (Audio check):
@@ -450,6 +450,7 @@ class Audio_List_Admin {
             const sermonDate = document.querySelector('input[name="sermondate"]').value;
             const year = sermonDate.split('-')[0];
             const statusDiv = document.getElementById('upload_status');
+            const audioPreviewTr = document.querySelector('tr#audio-preview');
 
             // Disable both buttons during upload
             fileSelectButton.disabled = true;
@@ -484,6 +485,9 @@ class Audio_List_Admin {
                     if (data.success) {
                         if (data.data.exists) {
                             if (!confirm('File already exists. Do you want to overwrite it?')) {
+                                statusDiv.textContent = 'Upload aborted';
+                                statusDiv.style.color = 'grey';
+                                fileSelectButton.disabled = false;
                                 return;
                             }
                         }
@@ -507,9 +511,15 @@ class Audio_List_Admin {
                         console.log('Upload result:', uploadResult);
 
                         if (uploadResult.success) {
-                            statusDiv.textContent = 'Uploaded successful!';
+                            statusDiv.textContent = 'Uploaded successful! Please Submit/Update';
                             statusDiv.style.color = 'green';
                             fileSelectButton.disabled = false;
+                            audioPreviewTr.removeAttribute('hidden');
+                            const audioPreview = audioPreviewTr.querySelector('audio');
+                            audioPreview.src = uploadResult.data.url;
+                            audioPreview.load();
+                            const audioPreviewA = audioPreviewTr.querySelector('a');
+                            audioPreviewA.href += year;
                         } else {
                             throw new Error(uploadResult.data || 'Upload failed');
                         }
@@ -543,7 +553,7 @@ class Audio_List_Admin {
                     audioDataSubmitButton.disabled = true;
                     uploadFile()
                         .then(() => {
-                            console.log('Upload successfully');
+                            console.log('executed uploadFile()');
                         })
                         .catch((error) => {
                             console.error('An error occurred while calling uploadFile():', error);
