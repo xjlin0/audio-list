@@ -340,7 +340,7 @@ class Audio_List_Admin {
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
-							        <input size="60" placeholder="Please fill 請填寫!!" 
+							        <input size="60" placeholder="Please fill or select a file 請填寫或選擇文件上傳!!"
                                         title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)"
                                         type="text" maxlength="255" name="audiofile" 
                                         value="<?php echo esc_attr($audiofile_value); ?>" 
@@ -348,9 +348,8 @@ class Audio_List_Admin {
                                     <span class="fielderror">*</span>
                                     <br>
                                     <input type="file" id="audio_file_select" accept="audio/*" style="display:none;">
-                                    <button type="button" class="button" onclick="document.getElementById('audio_file_select').click()">選擇文件 (Select File)</button>
-                                    <button type="button" class="button button-primary" id="upload_button" disabled>上傳AWS (Upload to AWS)</button>
-                                    <div id="upload_status"></div>
+                                    <button type="button" class="button" onclick="document.getElementById('audio_file_select').click()">選擇文件上傳 (Select a file to upload)</button>
+                                    <span style="vertical-align: -webkit-baseline-middle;" id="upload_status"></span>
 							    </td>
 							</tr>
 							<tr <?php echo esc_attr($audio ? '' : 'hidden'); ?>>
@@ -444,17 +443,9 @@ class Audio_List_Admin {
         </div>
         <script>
         const fileSelectButton = document.querySelector('button[onclick="document.getElementById(\'audio_file_select\').click()"]');
-        const uploadButton = document.getElementById('upload_button');
+        const audioDataSubmitButton = document.querySelector('input[name="submit"]');
 
-        document.getElementById('audio_file_select').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                document.getElementById('audiofile_input').value = file.name;
-                uploadButton.disabled = false;
-            }
-        });
-
-        document.getElementById('upload_button').addEventListener('click', async function() {
+        const uploadFile = async function() {
             const file = document.getElementById('audio_file_select').files[0];
             const sermonDate = document.querySelector('input[name="sermondate"]').value;
             const year = sermonDate.split('-')[0];
@@ -462,7 +453,6 @@ class Audio_List_Admin {
 
             // Disable both buttons during upload
             fileSelectButton.disabled = true;
-            uploadButton.disabled = true;
 
             try {
                 // Check if file exists
@@ -517,7 +507,7 @@ class Audio_List_Admin {
                         console.log('Upload result:', uploadResult);
 
                         if (uploadResult.success) {
-                            statusDiv.textContent = 'Upload successful!';
+                            statusDiv.textContent = 'Uploaded successful!';
                             statusDiv.style.color = 'green';
                             fileSelectButton.disabled = false;
                         } else {
@@ -532,7 +522,6 @@ class Audio_List_Admin {
                     statusDiv.style.color = 'red';
                     // Re-enable buttons on error
                     fileSelectButton.disabled = false;
-                    uploadButton.disabled = false;
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -540,7 +529,29 @@ class Audio_List_Admin {
                 statusDiv.style.color = 'red';
                 // Re-enable buttons on error
                 fileSelectButton.disabled = false;
-                uploadButton.disabled = false;
+            }
+        }
+
+        document.getElementById('audio_file_select').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const sermonDate = document.querySelector('input[name="sermondate"]').value;
+            const year = sermonDate.split('-')[0];
+
+            if (file) {
+                document.getElementById('audiofile_input').value = file.name;
+                if (year && confirm(`Do you want to upload the file to ${year} folder?`)) {
+                    audioDataSubmitButton.disabled = true;
+                    uploadFile()
+                        .then(() => {
+                            console.log('Upload successfully');
+                        })
+                        .catch((error) => {
+                            console.error('An error occurred while calling uploadFile():', error);
+                        })
+                        .finally(() => {
+                            audioDataSubmitButton.disabled = false;
+                        });
+                }
             }
         });
         </script>
