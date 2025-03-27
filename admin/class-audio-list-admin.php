@@ -561,6 +561,8 @@ class Audio_List_Admin {
                         .finally(() => {
                             audioDataSubmitButton.disabled = false;
                         });
+                } else {
+                    document.getElementById('audio_file_select').value = '';
                 }
             }
         });
