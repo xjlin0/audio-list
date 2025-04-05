@@ -1,5 +1,8 @@
 <?php
 
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -24,15 +27,32 @@ class Audio_List_Admin {
 
     private $plugin_name;
     private $version;
+    private $aws_handler;
 
     public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
+        $this->aws_handler = null;
+
+        if (defined('AS3CF_SETTINGS') && !empty(AS3CF_SETTINGS)) {
+            $aws_settings = unserialize(AS3CF_SETTINGS);
+
+            if (isset($aws_settings['provider'], $aws_settings['access-key-id'], $aws_settings['secret-access-key'])) {
+                $this->aws_handler = new AWS_Handler();
+            } else {
+                error_log('AWS configuration is incomplete or invalid.');
+            }
+        } else {
+            error_log('AS3CF_SETTINGS is not defined in wp-config.php.');
+        }
+
         add_action('admin_menu', array($this, 'add_plugin_menu_pages'));
         add_action('admin_post_custom_audio_list_form_submit', array($this, 'process_audio_list_form_submission'));
         add_action('admin_init', array($this, 'handle_form_submission'));
         add_action('admin_notices', array($this, 'custom_admin_notice'));
         add_action('admin_init', array($this, 'handle_custom_audio_list_get_schema'));
+        add_action('wp_ajax_check_aws_file', array($this, 'check_aws_file'));
+        add_action('wp_ajax_upload_to_aws', array($this, 'upload_to_aws'));
     }
 
     public function add_plugin_menu_pages() {
@@ -333,11 +353,19 @@ class Audio_List_Admin {
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
-							        <input size="60" placeholder="Please fill 請填寫!!" title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)" type="text" maxlength="255" name="audiofile" value="<?php echo esc_attr($audiofile_value); ?>">
-							        <span class="fielderror">*</span>
+							        <input size="60" placeholder="Please fill or select a file 請填寫或選擇文件上傳!!"
+                                        title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)"
+                                        type="text" maxlength="255" name="audiofile" 
+                                        value="<?php echo esc_attr($audiofile_value); ?>" 
+                                        id="audiofile_input">
+                                    <span class="fielderror">*</span>
+                                    <br>
+                                    <input type="file" id="audio_file_select" accept="audio/*" style="display:none;">
+                                    <button type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇文件上傳 (Select a file to upload)</button>
+                                    <span class="vertical-baseline-middle" id="upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
-							<tr <?php echo esc_attr($audio ? '' : 'hidden'); ?>>
+							<tr id="audio-preview" <?php echo esc_attr(isset($audio) ? '' : 'hidden'); ?>>
 								<td align="right">
 									<a href="<?php echo esc_attr($audio_preview . $sermon_year . ( $audiofile_value ? '/#' . substr($audiofile_value, 0, strrpos($audiofile_value, '.')) : '' )); ?>" target="_blank">
 							          試聽看 (Audio check):
@@ -426,6 +454,138 @@ class Audio_List_Admin {
 		        <?php endif; ?>
 		    </div>
         </div>
+        <script>
+        const fileSelectButton = document.querySelector('button[onclick="document.getElementById(\'audio_file_select\').click()"]');
+        const audioDataSubmitButton = document.querySelector('input[name="submit"]');
+        const statusDiv = document.getElementById('upload_status');
+
+        const uploadFile = async function() {
+            const file = document.getElementById('audio_file_select').files[0];
+            const sermonDate = document.querySelector('input[name="sermondate"]').value;
+            const year = sermonDate.split('-')[0];
+            const audioPreviewTr = document.querySelector('tr#audio-preview');
+
+            // Disable both buttons during upload
+            fileSelectButton.disabled = true;
+
+            try {
+                // Check if file exists
+                const formData = new FormData();
+                formData.append('action', 'check_aws_file');
+                formData.append('nonce', audioListAjax.nonce);
+                formData.append('year', year);
+                formData.append('filename', encodeURIComponent(file.name));
+
+                try {
+                    console.log('Checking file:', {year, filename: file.name});
+                    const response = await fetch(audioListAjax.ajaxurl, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const text = await response.text();  // Get response as text first
+                    console.log('Raw response:', text);
+                    
+                    let data;
+                    try {
+                        data = JSON.parse(text);  // Then parse it
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        throw new Error('Invalid server response format ' + text);
+                    }
+
+                    console.log('Parsed response:', data);
+
+                    if (data.success) {
+                        if (data.data.exists) {
+                            if (!confirm('File already exists. Do you want to overwrite it?')) {
+                                statusDiv.textContent = 'Upload aborted (file exists)';
+                                statusDiv.style.color = 'grey';
+                                fileSelectButton.disabled = false;
+                                return data;
+                            }
+                        }
+                        
+                        // Upload file
+                        statusDiv.textContent = 'Uploading...';
+                        const uploadData = new FormData();
+                        uploadData.append('action', 'upload_to_aws');
+                        uploadData.append('nonce', audioListAjax.nonce);
+                        uploadData.append('year', year);
+                        uploadData.append('file', file);
+
+                        const uploadResponse = await fetch(audioListAjax.ajaxurl, {
+                            method: 'POST',
+                            body: uploadData
+                        });
+                        const uploadText = await uploadResponse.text();
+                        console.log('Upload response text:', uploadText);
+                        
+                        const uploadResult = JSON.parse(uploadText);
+                        console.log('Upload result:', uploadResult);
+
+                        if (uploadResult.success) {
+                            statusDiv.textContent = 'Uploaded successful! Please Submit/Update';
+                            statusDiv.style.color = 'green';
+                            fileSelectButton.disabled = false;
+                            audioPreviewTr.removeAttribute('hidden');
+                            const audioPreview = audioPreviewTr.querySelector('audio');
+                            audioPreview.src = uploadResult.data.url;
+                            audioPreview.load();
+                            const audioPreviewA = audioPreviewTr.querySelector('a');
+                            audioPreviewA.href += year;
+                            return uploadResult;
+                        } else {
+                            throw new Error(uploadResult.data || 'Upload failed');
+                        }
+                    } else {
+                        throw new Error(data.data?.message || 'Check failed');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusDiv.textContent = 'Upload failed: ' + error.message;
+                    statusDiv.style.color = 'red';
+                    // Re-enable buttons on error
+                    fileSelectButton.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.textContent = 'Upload failed: ' + error.message;
+                statusDiv.style.color = 'red';
+                // Re-enable buttons on error
+                fileSelectButton.disabled = false;
+            }
+        }
+
+        document.getElementById('audio_file_select').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const sermonDate = document.querySelector('input[name="sermondate"]').value;
+            const year = sermonDate.split('-')[0];
+            const previousFilename = document.getElementById('audiofile_input').value;
+            if (file) {
+                document.getElementById('audiofile_input').value = file.name;
+                setTimeout(() => {  // confirm() is a blocking operation stopping the above DOM alteration
+                    if (year && confirm(`Do you want to ${previousFilename ? 'replace ' + previousFilename + ' and ' : ''}upload the file ${file.name} to ${year} folder?`)) {
+                        audioDataSubmitButton.disabled = true;
+                        uploadFile()
+                            .then((result) => {
+                                console.log('executed uploadFile(), result: ', result);
+                            })
+                            .catch((error) => {
+                                console.error('An error occurred while calling uploadFile():', error);
+                            })
+                            .finally(() => {
+                                audioDataSubmitButton.disabled = false;
+                            });
+                    } else if (previousFilename) {
+                        document.getElementById('audiofile_input').value = previousFilename;
+                    } else {
+                        statusDiv.textContent = 'You chose not to upload the file';
+                    }
+                    document.getElementById('audio_file_select').value = '';
+                }, 1)
+            }
+        });
+        </script>
         <?php
     }
 
@@ -534,5 +694,39 @@ class Audio_List_Admin {
 
     public function enqueue_scripts() {
         wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/audio-list-admin.js', array('jquery'), $this->version, false);
+        wp_localize_script($this->plugin_name, 'audioListAjax', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('audio_upload_nonce')
+        ));
+    }
+
+    public function check_aws_file() {
+        if (!wp_verify_nonce($_POST['nonce'], 'audio_upload_nonce')) {
+            wp_send_json_error('Invalid nonce');
+        }
+
+        $year = sanitize_text_field($_POST['year']);
+        $filename = urldecode(sanitize_text_field($_POST['filename']));
+
+        try {
+            $exists = $this->aws_handler->check_file_exists($year, $filename);
+            wp_send_json_success(['exists' => $exists]);
+        } catch (Exception $e) {
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    public function upload_to_aws() {
+        if (!wp_verify_nonce($_POST['nonce'], 'audio_upload_nonce')) {
+            wp_send_json_error('Invalid nonce');
+        }
+
+        try {
+            $year = sanitize_text_field($_POST['year']);
+            $url = $this->aws_handler->upload_file($year, $_FILES['file']);
+            wp_send_json_success(['url' => $url]);
+        } catch (Exception $e) {
+            wp_send_json_error($e->getMessage());
+        }
     }
 }

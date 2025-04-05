@@ -15,6 +15,10 @@
   vertical-align: top;
 }
 
+.vertical-baseline-middle {
+  vertical-align: -webkit-baseline-middle;
+}
+
 .button.red {
   background-color: red;
 }

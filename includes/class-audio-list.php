@@ -122,6 +122,8 @@ class Audio_List {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-audio-list-public.php';
 
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-aws-handler.php';
+
 		$this->loader = new Audio_List_Loader();
 
 	}

@@ -28,8 +28,16 @@ In the Wordpress Admin dashboard, Contributors will find side bar menu item "Aud
 ## Installation
 
 1. Download the plugin as a [ZIP file](https://github.com/xjlin0/audio-list/archive/master.zip) from GitHub.
-2. Install and Activate the plugin through the 'Plugins' and Upload menu in WordPress admin dashboard.
-3. Optionally, restore the Mysql database table `wp_audio_list`.
+2. If AWS direct upload needed, please define AWS key and secret in the wp-config.php
+```php
+define( 'AS3CF_SETTINGS', serialize( array(
+    'provider' => 'aws',
+    'access-key-id' => '********************',
+    'secret-access-key' => '**************************************',
+) ) );
+```
+3. Install and Activate the plugin through the 'Plugins' and Upload menu in WordPress admin dashboard.
+4. Optionally, restore the Mysql database table `wp_audio_list`.
 
 ## Streenshots
 ![A screenshot of audio list in Wordpress admin dashboard](./assets/audios.jpg)
