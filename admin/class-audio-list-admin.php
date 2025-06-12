@@ -353,15 +353,15 @@ class Audio_List_Admin {
 							        錄音檔名 (Audio File Name):
 							    </td>
 							    <td>
-							        <input size="60" placeholder="Please fill or select a file 請填寫或選擇文件上傳!!"
+							        <input size="60" placeholder="Please fill or select a file 請填寫或選擇音訊檔上傳,檔名不能有中文或空白"
                                         title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)"
-                                        type="text" maxlength="255" name="audiofile" 
+                                        type="text" maxlength="255" name="audiofile" pattern="^[a-zA-Z0-9\.]*$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 檔名只能是英數字,不能有中文或空白')" onchange="setCustomValidity('')"
                                         value="<?php echo esc_attr($audiofile_value); ?>" 
                                         id="audiofile_input">
                                     <span class="fielderror">*</span>
                                     <br>
-                                    <input type="file" id="audio_file_select" accept="audio/*" style="display:none;">
-                                    <button type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇文件上傳 (Select a file to upload)</button>
+                                    <input type="file" pattern="^[a-zA-Z0-9\.]*$" id="audio_file_select" accept="audio/mpeg, audio/wav, audio/ogg" style="display:none;">
+                                    <button title="Only alphanumeric filenames 檔名只能是英數字" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇音訊檔上傳 (Select a file to upload)</button>
                                     <span class="vertical-baseline-middle" id="upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
@@ -557,11 +557,18 @@ class Audio_List_Admin {
         }
 
         document.getElementById('audio_file_select').addEventListener('change', function(e) {
+            const alphanumericRegex = /^[a-zA-Z0-9\.]+$/;
             const file = e.target.files[0];
             const sermonDate = document.querySelector('input[name="sermondate"]').value;
             const year = sermonDate.split('-')[0];
             const previousFilename = document.getElementById('audiofile_input').value;
             if (file) {
+                console.log("file name: ", file.name);
+                if (!alphanumericRegex.test(file.name)) {
+                    alert("Only alphanumeric filenames allowed 檔名只能是英數字, 不能有中文或空白");
+                    document.getElementById('audio_file_select').value = '';
+                    return;
+                }
                 document.getElementById('audiofile_input').value = file.name;
                 setTimeout(() => {  // confirm() is a blocking operation stopping the above DOM alteration
                     if (year && confirm(`Do you want to ${previousFilename ? 'replace ' + previousFilename + ' and ' : ''}upload the file ${file.name} to ${year} folder?`)) {
