@@ -4,10 +4,11 @@
  */
 
 ul.audio-list summary.underline-pointer {
-	text-decoration: underline;
-	cursor: pointer;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  text-align: center !important;
 }
 
 ul.audio-list details.align-left {
-	text-align: left;
+  text-align: left !important;
 }
