@@ -3,7 +3,8 @@
  * included in this file.
  */
 
-details summary.underline-pointer {
+ul.audio-list summary.underline-pointer {
 	text-decoration: underline;
 	cursor: pointer;
+	text-align: left;
 }
