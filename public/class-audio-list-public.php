@@ -117,7 +117,7 @@ class Audio_List_Public {
 							$speaker = esc_html($result->speaker);
 							$type = esc_html($result->type);
 							$audio_id = htmlspecialchars($id . $filename);
-							$note = empty($result->note) ? '' : '<details><summary class="underline-pointer">按此顯示/隱藏摘要</summary>'.nl2br($result->note).'</details><br/>';
+							$note = empty($result->note) ? '' : '<details class="align-left"><summary class="underline-pointer">按此顯示/隱藏摘要</summary>'.nl2br($result->note).'</details><br/>';
 							$li = '<li id="'.($audio_id ? $audio_id : $id.md5($sermondate.$speaker.$topic.$type)).'"' . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
 							$series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
 							$section = empty($result->section) ? '<br/>' . $type . '<br/>' : '<br/>'. $type . ': <span>'. esc_html($result->section) .'</span><br/>' ;

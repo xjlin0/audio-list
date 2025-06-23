@@ -6,5 +6,8 @@
 ul.audio-list summary.underline-pointer {
 	text-decoration: underline;
 	cursor: pointer;
+}
+
+ul.audio-list details.align-left {
 	text-align: left;
 }
