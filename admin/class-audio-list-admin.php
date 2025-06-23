@@ -607,9 +607,9 @@ class Audio_List_Admin {
         $section = html_entity_decode(sanitize_text_field($_POST['section']));
         $location = html_entity_decode(sanitize_text_field($_POST['location']));
         $type = sanitize_text_field($_POST['type']);
-        $remark = html_entity_decode(sanitize_text_field($_POST['remark']));
-        $note = html_entity_decode(sanitize_text_field($_POST['note']));
-        $content = html_entity_decode(sanitize_text_field($_POST['content']));
+        $remark = html_entity_decode(sanitize_textarea_field($_POST['remark']));
+        $note = html_entity_decode(sanitize_textarea_field($_POST['note']));
+        $content = html_entity_decode(sanitize_textarea_field($_POST['content']));
         $url = html_entity_decode(sanitize_text_field($_POST['url']));
         $link = html_entity_decode(sanitize_text_field($_POST['link']));
         $series = html_entity_decode(sanitize_text_field($_POST['series']));

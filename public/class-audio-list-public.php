@@ -117,8 +117,8 @@ class Audio_List_Public {
 							$speaker = esc_html($result->speaker);
 							$type = esc_html($result->type);
 							$audio_id = htmlspecialchars($id . $filename);
-							$liTitleWithoutEnd = empty($result->note) ? '<li' : '<li title="'. htmlspecialchars($result->note) .'"';
-							$li = $liTitleWithoutEnd .' id="'.($audio_id ? $audio_id : $id.md5($sermondate.$speaker.$topic.$type)).'"' . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
+							$note = empty($result->note) ? '' : '<button class="btn" type="button" onclick="alert(`'. esc_html(  $result->note)    .'`)">摘要</button>';
+							$li = '<li id="'.($audio_id ? $audio_id : $id.md5($sermondate.$speaker.$topic.$type)).'"' . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
 							$series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
 							$section = empty($result->section) ? '<br/>' . $type . '<br/>' : '<br/>'. $type . ': <span>'. esc_html($result->section) .'</span><br/>' ;
 							if ($result->audiofile) {
@@ -136,7 +136,7 @@ class Audio_List_Public {
 								$li
 									$sermondate &nbsp; $topic
 									$section
-									$series $speaker
+									$series $speaker $note
 									<br/>
 									$audioPlayer
 								</li>
