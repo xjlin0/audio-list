@@ -407,7 +407,7 @@ class Audio_List_Admin {
 							        內容(content):
 							    </td>
 							    <td>
-							        <textarea id="content" placeholder="transcript 逐字稿" maxlength="21845" name="note" cols="60" rows="5"><?php echo esc_attr($note_value); ?></textarea>
+							        <textarea id="content" placeholder="transcript 逐字稿" maxlength="21845" name="content" cols="60" rows="5"><?php echo esc_attr($note_value); ?></textarea>
 							    </td>
 							</tr>
 							<tr>
