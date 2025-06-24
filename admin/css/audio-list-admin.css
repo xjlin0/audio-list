@@ -11,10 +11,6 @@
 	color: red;
 }
 
-td[align="right"] p.green {
-  color: green;
-}
-
 .top {
   vertical-align: top;
 }

@@ -188,7 +188,15 @@ class Audio_List_Admin {
             $insert_statements = '';
             foreach ($data_results as $row) {
                 $columns = implode(', ', array_map('esc_sql', array_keys($row)));
-                $values = "'" . implode("', '", array_map('esc_sql', array_values($row))) . "'";
+
+                $processed_values = array_map(function($value) use ($wpdb) {
+                    if (is_null($value)) {
+                        return 'NULL';
+                    }
+                    return "'" . esc_sql($value) . "'";
+                }, array_values($row));
+
+                $values = implode(', ', $processed_values);
                 $insert_statements .= "INSERT INTO {$table_name} ($columns) VALUES ($values);\n";
             }
 
@@ -350,7 +358,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        錄音檔名 (Audio File Name):<br><br><p class="green" title="範例example:&#010;20250316yeh2.mp3">格式yyyyMMDDname.mp3</p>
+							        錄音檔名 (Audio File Name):<br><br><p style="color:green;" title="範例example:&#010;20250316yeh2.mp3">格式yyyyMMDDname.mp3</p>
 							    </td>
 							    <td>
 							        <input size="60" placeholder="Please fill or select a file 請填寫或選檔上傳,檔名YYYYMMDDname.mp3不能有中文或空白"
