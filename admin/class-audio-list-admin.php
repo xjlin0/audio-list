@@ -604,6 +604,36 @@ class Audio_List_Admin {
         <?php
     }
 
+    public function clear_w3tc_cache($sermondate) {
+        $post_id = 0;
+        $permalink_slug = '';
+
+        if (!function_exists('w3tc_pgcache_flush_post')){
+            error_log("No W3TC function available, skipping clearing cache.");
+            return;
+        }
+
+        try {
+            $date = new DateTime($sermondate);
+            $year = $date->format('Y');
+            $permalink_slug = 'sermon-' . $year;
+            error_log("permalink is: " . $permalink_slug);
+            $post = get_page_by_path( $permalink_slug, OBJECT, ['page', 'post'] );
+
+            if ($post) {
+                $post_id = $post->ID;
+                w3tc_pgcache_flush_post($post_id);
+            } else {
+                error_log("No post found for permalink slug: " . $permalink_slug);
+            }
+
+        } catch (Exception $e) {
+            error_log("Error in clear_w3tc_cache: " . $e->getMessage());
+            error_log("sermondate is: " . $sermondate);
+            error_log("post_id is: " . $post_id);
+        }
+    }
+
     public function process_audio_list_form_submission() {
         ob_start();
         global $wpdb;
@@ -637,7 +667,8 @@ class Audio_List_Admin {
             );
 
             if ($result !== false) {  // Set a transient message with the magic word 'successfully' to display after redirect
-                set_transient('custom_audio_list_message', $prompt_link . $audio_id . $message . ' successfully ' . ($operation === 'delete' ? ' deleted.' : ' restored.') . '</a>', 30);
+                set_transient('custom_audio_list_message', $prompt_link . $audio_id . $message . ' successfully ' . ($operation === 'delete' ? ' deleted,' : ' restored,') . ' and W3TC cache cleared.'. '</a>', 30);
+                $this->clear_w3tc_cache($sermondate);
                 $params = array('circle' => $audio_id );
                 wp_redirect(admin_url('admin.php?page=select-audio&'.http_build_query($params)).'#audio-list-'.$audio_id);  // Redirect to the plugin root admin URL
                 exit;
@@ -680,7 +711,8 @@ class Audio_List_Admin {
 		}
 
         if ($result !== false) {  // Set a transient message to display after redirect
-            set_transient('custom_audio_list_message', ($audio_id ? $link . $audio_id . $message . ' successfully updated.' : $link . $new_id . $message . ' successfully added.') . '</a>', 30);  // Redirect to the plugin root admin URL
+            set_transient('custom_audio_list_message', ($audio_id ? $prompt_link . $audio_id . $message . ' successfully updated,' : $prompt_link . $new_id . $message . ' successfully added,') . ' and W3TC cache cleared.'. '</a>', 30);  // Redirect to the plugin root admin URL
+            $this->clear_w3tc_cache($sermondate);
             $params = array('circle' => $audio_id ? $audio_id : $new_id );
             wp_redirect(admin_url('admin.php?page=select-audio&'.http_build_query($params)).'#audio-list-'.($audio_id ? $audio_id : $new_id));
             exit;
