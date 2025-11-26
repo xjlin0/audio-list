@@ -639,6 +639,9 @@ class Audio_List_Admin {
 
     public function process_audio_list_form_submission() {
         ob_start();
+        if (isset($_POST)) {
+            $_POST = stripslashes_deep($_POST);
+        }  // somehow quotes got double escaped, let's remove them here.
         global $wpdb;
         $current_user = wp_get_current_user();
         $audio_id = isset($_POST['audio_id']) ? intval($_POST['audio_id']) : 0;
