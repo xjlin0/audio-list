@@ -86,7 +86,7 @@ class Audio_List_Admin {
 
     public function custom_select_audio_page() {
         global $wpdb;
-        $audioList = $wpdb->get_results("SELECT id, audiofile, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
+        $audioList = $wpdb->get_results("SELECT id, note, url, audiofile, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
         $params = array();
         parse_str($_SERVER['QUERY_STRING'], $params);
         $circle = $params['circle'] ?? null;
@@ -102,15 +102,15 @@ class Audio_List_Admin {
                     <tr>
                         <th>日期(Date)</th>
                         <th>講員(Speaker)</th>
-                        <th>主題/系列(Topic & series)</th>
-                        <th>經節(Section)</th>
+                        <th title="Abstract included?">📄 主題/系列(Topic & series)</th>
+                        <th title="Video link included?">📹 經節(Section)</th>
                         <th>類型/地點 (Type & location)</th>
                         <th>操作(Operation)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($audioList as $audio) : 
-                    $topicAndSeries = esc_html($audio->topic). ' ' . esc_html($audio->series);
+                    $topicAndSeries = (empty($audio->note) ? '☐' : '☑') . esc_html($audio->topic). ' ' . esc_html($audio->series);
                     $trStyle = '';
                     if (empty($audio->audiofile)) {
                         $topicAndSeries = '(Unavailable) ' . $topicAndSeries;
@@ -119,7 +119,7 @@ class Audio_List_Admin {
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo $topicAndSeries; ?></td>
-                            <td><?php echo esc_html($audio->section); ?></td>
+                            <td><?php echo (empty($audio->url) ? '☐' : '☑') . esc_html($audio->section); ?></td>
                             <td><?php echo esc_html($audio->type) . ' ' . esc_html($audio->location); ?></td>
                             <td>
                                 <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-primary red'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Edit</a>
