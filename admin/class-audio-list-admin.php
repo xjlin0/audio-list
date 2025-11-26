@@ -313,7 +313,7 @@ class Audio_List_Admin {
 							        主題(Topic):
 							    </td>
 							    <td>
-							        <input size="60" type="text" name="topic" maxlength="255" value="<?php echo esc_attr($topic_value); ?>" required>
+							        <input size="60" type="text" name="topic" maxlength="255" title="不能包含'系列'這個詞" value="<?php echo esc_attr($topic_value); ?>" pattern="^(?!.*(系列|系列)).*$"  oninvalid="setCustomValidity('主題請勿包含`系列`, 請把系列的名稱copy到系列名稱 (series)欄位')" onchange="setCustomValidity('')" required>
 							        <span class="fielderror">*</span>
 							    </td>
 							</tr>
@@ -353,7 +353,7 @@ class Audio_List_Admin {
 							        系列名稱 (series):
 							    </td>
 							    <td>
-							        <input size="60" type="text" maxlength="45" name="series" value="<?php echo esc_attr($series_value); ?>">
+							        <input size="60" type="text" maxlength="45" name="series" placeholder="'系列'這個詞不用附上" value="<?php echo esc_attr($series_value); ?>" pattern="^(?!.*(系列|系列)).*$"  oninvalid="setCustomValidity('請刪去`系列`這個詞')" onchange="setCustomValidity('')" >
 							    </td>
 							</tr>
 							<tr>
