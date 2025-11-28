@@ -200,7 +200,7 @@ class Audio_List_Admin {
                 $insert_statements .= "INSERT INTO {$table_name} ($columns) VALUES ($values);\n";
             }
 
-            $combined_sql = "-- Table Schema\n" . preg_replace('/^CREATE TABLE/', 'CREATE TABLE IF NOT EXISTS', $schema) . ";\n\n-- Data\n" . $insert_statements;
+            $combined_sql = "SET NAMES utf8mb4;\nSET CHARACTER_SET_CLIENT = utf8mb4;\nSET CHARACTER_SET_CONNECTION = utf8mb4;\nSET CHARACTER_SET_RESULTS = utf8mb4;\n\n-- Table Schema\n" . preg_replace('/^CREATE TABLE/', 'CREATE TABLE IF NOT EXISTS', $schema) . ";\n\n-- Data\n" . $insert_statements;
 
             $compressed_sql = gzencode($combined_sql);
 
