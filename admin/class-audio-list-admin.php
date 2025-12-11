@@ -218,7 +218,11 @@ class Audio_List_Admin {
     public function custom_audio_list_page() {
         global $wpdb;
         $audio_prefix = 'https://s3-us-west-1.amazonaws.com/chinese-church/restructure_sermon/';
-        $audio_preview = '/hayward/sermon-';
+
+        $path = parse_url( site_url(), PHP_URL_PATH );
+        $subfolder = trim( (string) $path, '/' );
+
+        $audio_preview =  $subfolder . '/sermon-';
         $current_user = wp_get_current_user();
         $audio_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $sermondate_value = date('Y-m-d');
