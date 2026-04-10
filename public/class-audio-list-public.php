@@ -95,7 +95,7 @@ class Audio_List_Public {
 
 	    $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
 
-	    $query = $wpdb->prepare("SELECT id, sermondate, type, section, series, audiofile, note, topic, series, speaker FROM $table_name $where_clause ORDER BY sermondate DESC", $query_params);
+	    $query = $wpdb->prepare("SELECT id, sermondate, type, section, series, audiofile, note, topic, series, speaker, link FROM $table_name $where_clause ORDER BY sermondate DESC", $query_params);
 
 	    $results = $wpdb->get_results($query);
 
@@ -131,14 +131,37 @@ class Audio_List_Public {
 							} else {
 								$audioPlayer = '<span>Unavailable 無檔案</span>';
 							}
-
+	
+							// Process link field for PDF/image display
+							$linkContent = '';
+							if (!empty($result->link)) {
+								$link = trim($result->link);
+								$linkExt = strtolower(pathinfo($link, PATHINFO_EXTENSION));
+								$escapedLink = esc_url($link);
+								
+								if ($linkExt === 'pdf') {
+									// PDF display using iframe
+									$linkContent = <<<PDFHTML
+										<div class="pdf-item" data-src="$escapedLink">
+											<iframe class="pdf-frame" loading="lazy"></iframe>
+										</div>
+									PDFHTML;
+								} elseif (in_array($linkExt, array('jpg', 'jpeg', 'png', 'gif'))) {
+									// Image display
+									$linkContent = '<div class="link-image-wrapper"><img src="' . $escapedLink . '" alt="附件圖片" class="link-image" /></div>';
+								} else {
+									// Other link types - display as hyperlink
+									$linkContent = '<div class="link-other"><a href="' . $escapedLink . '" target="_blank" rel="noopener noreferrer">下載附件</a></div>';
+								}
+							}
+	
 							$output .= <<<EOD
 								$li
 									$sermondate &nbsp; $topic
 									$section
 									$series $speaker
 									<br/>
-									$audioPlayer $note
+									$audioPlayer $linkContent $note
 								</li>
 							EOD;
 			    }

@@ -29,4 +29,32 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	$(function() {
+		// PDF Lazy Loading with Intersection Observer
+		// Auto-loads PDF when scrolling into view
+		
+		const observer = new IntersectionObserver(entries => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const item = entry.target;
+					const iframe = item.querySelector('.pdf-frame');
+					const src = item.dataset.src;
+
+					if (src && !iframe.src) {
+						iframe.src = src;
+					}
+					// Stop observing once loaded
+					observer.unobserve(item);
+				}
+			});
+		}, {
+			rootMargin: "200px" // Start loading 200px before visible
+		});
+
+		// Observe all PDF items
+		document.querySelectorAll('.pdf-item').forEach(item => {
+			observer.observe(item);
+		});
+	});
+
 })( jQuery );

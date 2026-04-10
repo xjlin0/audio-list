@@ -11,3 +11,72 @@ ul.audio-list summary.underline-pointer {
 ul.audio-list {
   list-style-type: none;
 }
+
+/* PDF Display Styles */
+.pdf-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  margin: 10px 0;
+}
+
+.pdf-frame {
+  width: 100%;
+  height: 600px;
+  border: none;
+  display: block;
+}
+
+/* Image Display Styles */
+.link-image-wrapper {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.link-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Other Link Styles */
+.link-other {
+  margin: 10px 0;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-left: 3px solid #0073aa;
+  border-radius: 4px;
+}
+
+.link-other a {
+  text-decoration: none;
+  color: #0073aa;
+  font-weight: 500;
+}
+
+.link-other a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+  .pdf-frame {
+    height: 400px;
+  }
+
+  .pdf-placeholder {
+    height: 200px;
+  }
+
+  .pdf-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .pdf-toolbar .btn {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}
