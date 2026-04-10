@@ -161,6 +161,7 @@ class Audio_List_Admin {
         <div class="wrap">
             <h1><?php echo get_bloginfo('description'); ?></h1>
             <h2>Hello! <?php  echo wp_get_current_user()->display_name; ?></h2>
+            <p>若需修改程式碼，請至<a href="https://github.com/xjlin0/audio-list" target="_blank">audio-list plugin</a></p>
             <br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=custom-audio-list'); ?>'" title="Create audio record">1.新增錄音資料 (Create audio record)</button>
             <br><br>
@@ -435,7 +436,7 @@ class Audio_List_Admin {
 							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">連結(link)</a>:
 							    </td>
 							    <td>
-							        <input type="text" size="60" placeholder="picture link 圖片連結" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
+							        <input type="text" size="60" placeholder="pdf 或 圖片連結" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
 							    </td>
 							</tr>
 							<tr>
