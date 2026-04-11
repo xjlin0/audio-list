@@ -368,13 +368,13 @@ class Audio_List_Admin {
 							    <td>
 							        <input size="60" placeholder="Please fill or select a file 請填寫或選檔上傳,檔名YYYYMMDDname.mp3不能有中文或空白"
                                         title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)"
-                                        type="text" maxlength="255" name="audiofile" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.mp3')" onchange="setCustomValidity('')"
+                                        type="text" maxlength="255" name="audiofile" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 錄音檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.mp3')" onchange="setCustomValidity('')"
                                         value="<?php echo esc_attr($audiofile_value); ?>" 
                                         id="audiofile_input">
                                     <span class="fielderror">*</span>
                                     <br>
                                     <input type="file" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" id="audio_file_select" accept="audio/mpeg, audio/wav, audio/ogg" style="display:none;">
-                                    <button title="Only alphanumeric filenames 檔名只能是英數字如YYYYMMDDname.mp3" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇音訊檔上傳 (Select a file to upload)</button>
+                                    <button title="Only alphanumeric filenames 錄音檔名只能是英數字如YYYYMMDDname.mp3" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇音訊檔上傳 (Select a file to upload)</button>
                                     <span class="vertical-baseline-middle" id="upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
@@ -434,9 +434,14 @@ class Audio_List_Admin {
 							<tr>
 								<td align="right">
 							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">公開講義連結(link)</a>:
+                                    <br><br><p style="color:green;" title="範例example:&#010;20250316yeh2.pdf">格式yyyyMMDDname.pdf</p>
 							    </td>
 							    <td>
-							        <input type="text" size="60" title="只能選單一個公開講義檔案" placeholder="Please select a file 請選檔上傳,檔名YYYYMMDDname.pdf/jpg/gif/png等,不能有中文或空白" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.pdf')" onchange="setCustomValidity('')" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
+							        <input type="text" size="60" id="handoutfile_select" title="只能選單一個公開講義檔案" placeholder="Please select a file 請選檔上傳,檔名YYYYMMDDname.pdf/jpg/gif/png等,不能有中文或空白" pattern="^https?:\/\/[a-zA-Z0-9.-]+(\/[^\s\/]+)*\/\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 講義檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.pdf')" onchange="setCustomValidity('')" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
+                                    <br>
+                                    <input type="file" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" id="handout_file_select" accept="application/pdf, image/png, image/jpeg" style="display:none;">
+                                    <button title="Only alphanumeric filenames 講義檔名只能是英數字如YYYYMMDDname.pdf" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('handout_file_select').click()">選擇講義檔上傳 (Select a file to upload)</button>
+                                    <span class="vertical-baseline-middle" id="handout_upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
 							<tr>
