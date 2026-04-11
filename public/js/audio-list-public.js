@@ -32,8 +32,8 @@
 	$(function() {
 		// PDF Lazy Loading with Intersection Observer
 		// Auto-loads PDF when scrolling into view
-		
-		const observer = new IntersectionObserver(entries => {
+
+		const pdfObserver = new IntersectionObserver(entries => {
 			entries.forEach(entry => {
 				if (entry.isIntersecting) {
 					const item = entry.target;
@@ -44,16 +44,57 @@
 						iframe.src = src;
 					}
 					// Stop observing once loaded
-					observer.unobserve(item);
+					pdfObserver.unobserve(item);
 				}
 			});
 		}, {
-			rootMargin: "200px" // Start loading 200px before visible
+			rootMargin: "300px" // Start loading 200px before visible
 		});
 
 		// Observe all PDF items
 		document.querySelectorAll('.pdf-item').forEach(item => {
-			observer.observe(item);
+			pdfObserver.observe(item);
+		});
+
+		// YouTube Lazy Loading with Intersection Observer
+		// Auto-loads YouTube iframe when scrolling into view
+
+		const youtubeObserver = new IntersectionObserver(entries => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const item = entry.target;
+					const youtubeId = item.dataset.youtubeId;
+
+					// Check if iframe not already loaded
+					if (youtubeId && !item.querySelector('iframe')) {
+						// Create and insert iframe
+						const iframe = document.createElement('iframe');
+						iframe.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;';
+						iframe.src = `https://www.youtube.com/embed/${youtubeId}`;
+						iframe.setAttribute('frameborder', '0');
+						iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+						iframe.allowFullscreen = true;
+
+						// Remove placeholder
+						const placeholder = item.querySelector('.youtube-placeholder');
+						if (placeholder) {
+							placeholder.remove();
+						}
+
+						// Append iframe
+						item.appendChild(iframe);
+					}
+					// Stop observing once loaded
+					youtubeObserver.unobserve(item);
+				}
+			});
+		}, {
+			rootMargin: "300px" // Start loading 300px before visible (earlier than PDF for smooth playback)
+		});
+
+		// Observe all YouTube items
+		document.querySelectorAll('.youtube-item').forEach(item => {
+			youtubeObserver.observe(item);
 		});
 	});
 
