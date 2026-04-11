@@ -425,7 +425,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        <a href="<?php echo(empty($url_value) ? '#' : esc_attr($url_value)); ?>">網址(url)</a>:
+							        <a href="<?php echo(empty($url_value) ? '#' : esc_attr($url_value)); ?>">公開錄影網址(url)</a>:
 							    </td>
 							    <td>
 							        <input type="text" size="60" placeholder="youtube url" maxlength="100" name="url" value="<?php echo esc_attr($url_value); ?>">
@@ -433,10 +433,10 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">連結(link)</a>:
+							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">公開講義連結(link)</a>:
 							    </td>
 							    <td>
-							        <input type="text" size="60" placeholder="pdf 或 圖片連結" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
+							        <input type="text" size="60" title="只能選單一個公開講義檔案" placeholder="Please select a file 請選檔上傳,檔名YYYYMMDDname.pdf/jpg/gif/png等,不能有中文或空白" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.pdf')" onchange="setCustomValidity('')" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
 							    </td>
 							</tr>
 							<tr>
@@ -467,145 +467,6 @@ class Audio_List_Admin {
 		        <?php endif; ?>
 		    </div>
         </div>
-        <script>
-        const fileSelectButton = document.querySelector('button[onclick="document.getElementById(\'audio_file_select\').click()"]');
-        const audioDataSubmitButton = document.querySelector('input[name="submit"]');
-        const statusDiv = document.getElementById('upload_status');
-
-        const uploadFile = async function() {
-            const file = document.getElementById('audio_file_select').files[0];
-            const sermonDate = document.querySelector('input[name="sermondate"]').value;
-            const year = sermonDate.split('-')[0];
-            const audioPreviewTr = document.querySelector('tr#audio-preview');
-
-            // Disable both buttons during upload
-            fileSelectButton.disabled = true;
-
-            try {
-                // Check if file exists
-                const formData = new FormData();
-                formData.append('action', 'check_aws_file');
-                formData.append('nonce', audioListAjax.nonce);
-                formData.append('year', year);
-                formData.append('filename', encodeURIComponent(file.name));
-
-                try {
-                    console.log('Checking file:', {year, filename: file.name});
-                    const response = await fetch(audioListAjax.ajaxurl, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const text = await response.text();  // Get response as text first
-                    console.log('Raw response:', text);
-                    
-                    let data;
-                    try {
-                        data = JSON.parse(text);  // Then parse it
-                    } catch (e) {
-                        console.error('JSON parse error:', e);
-                        throw new Error('Invalid server response format ' + text);
-                    }
-
-                    console.log('Parsed response:', data);
-
-                    if (data.success) {
-                        if (data.data.exists) {
-                            if (!confirm('File already exists. Do you want to overwrite it?')) {
-                                statusDiv.textContent = 'Upload aborted (file exists)';
-                                statusDiv.style.color = 'grey';
-                                fileSelectButton.disabled = false;
-                                return data;
-                            }
-                        }
-                        
-                        // Upload file
-                        statusDiv.textContent = 'Uploading...';
-                        const uploadData = new FormData();
-                        uploadData.append('action', 'upload_to_aws');
-                        uploadData.append('nonce', audioListAjax.nonce);
-                        uploadData.append('year', year);
-                        uploadData.append('file', file);
-
-                        const uploadResponse = await fetch(audioListAjax.ajaxurl, {
-                            method: 'POST',
-                            body: uploadData
-                        });
-                        const uploadText = await uploadResponse.text();
-                        console.log('Upload response text:', uploadText);
-                        
-                        const uploadResult = JSON.parse(uploadText);
-                        console.log('Upload result:', uploadResult);
-
-                        if (uploadResult.success) {
-                            statusDiv.textContent = 'Uploaded successful! Please Submit/Update';
-                            statusDiv.style.color = 'green';
-                            fileSelectButton.disabled = false;
-                            audioPreviewTr.removeAttribute('hidden');
-                            const audioPreview = audioPreviewTr.querySelector('audio');
-                            audioPreview.src = uploadResult.data.url;
-                            audioPreview.load();
-                            const audioPreviewA = audioPreviewTr.querySelector('a');
-                            audioPreviewA.href += year;
-                            return uploadResult;
-                        } else {
-                            throw new Error(uploadResult.data || 'Upload failed');
-                        }
-                    } else {
-                        throw new Error(data.data?.message || 'Check failed');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    statusDiv.textContent = 'Upload failed: ' + error.message;
-                    statusDiv.style.color = 'red';
-                    // Re-enable buttons on error
-                    fileSelectButton.disabled = false;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                statusDiv.textContent = 'Upload failed: ' + error.message;
-                statusDiv.style.color = 'red';
-                // Re-enable buttons on error
-                fileSelectButton.disabled = false;
-            }
-        }
-
-        document.getElementById('audio_file_select').addEventListener('change', function(e) {
-            const alphanumericRegex = /^\d{8}[a-z]+\d*\.[a-z0-9]{3}$/;
-            const file = e.target.files[0];
-            const sermonDate = document.querySelector('input[name="sermondate"]').value;
-            const year = sermonDate.split('-')[0];
-            const previousFilename = document.getElementById('audiofile_input').value;
-            if (file) {
-                console.log("file name: ", file.name);
-                if (!alphanumericRegex.test(file.name)) {
-                    alert("Only alphanumeric filenames allowed 檔名不能有中文或空白, 只能是小寫英數字如 YYYYMMDDname.mp3");
-                    document.getElementById('audio_file_select').value = '';
-                    return;
-                }
-                document.getElementById('audiofile_input').value = file.name;
-                setTimeout(() => {  // confirm() is a blocking operation stopping the above DOM alteration
-                    if (year && confirm(`Do you want to ${previousFilename ? 'replace ' + previousFilename + ' and ' : ''}upload the file ${file.name} to ${year} folder?`)) {
-                        audioDataSubmitButton.disabled = true;
-                        uploadFile()
-                            .then((result) => {
-                                console.log('executed uploadFile(), result: ', result);
-                            })
-                            .catch((error) => {
-                                console.error('An error occurred while calling uploadFile():', error);
-                            })
-                            .finally(() => {
-                                audioDataSubmitButton.disabled = false;
-                            });
-                    } else if (previousFilename) {
-                        document.getElementById('audiofile_input').value = previousFilename;
-                    } else {
-                        statusDiv.textContent = 'You chose not to upload the file';
-                    }
-                    document.getElementById('audio_file_select').value = '';
-                }, 1)
-            }
-        });
-        </script>
         <?php
     }
 
