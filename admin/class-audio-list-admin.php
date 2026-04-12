@@ -437,7 +437,7 @@ class Audio_List_Admin {
                                     <br><br><p style="color:green;" title="範例example:&#010;20250316yeh2.pdf">格式yyyyMMDDname.pdf</p>
 							    </td>
 							    <td>
-							        <input type="text" size="60" id="handoutfile_select" title="只能選單一個公開講義檔案" placeholder="Please select a file 請選檔上傳,檔名YYYYMMDDname.pdf/jpg/gif/png等,不能有中文或空白" pattern="^https?:\/\/[a-zA-Z0-9.-]+(\/[^\s\/]+)*\/\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 講義檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.pdf')" onchange="setCustomValidity('')" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
+							        <input type="text" size="60" id="handoutfile_select" title="只能選單一個公開講義檔案" placeholder="Please select a file 請選檔上傳,檔名YYYYMMDDname.pdf/jpg/gif/png等,不能有中文或空白" pattern="^https?://[a-zA-Z0-9.-]+(/[^/]+)*/\d{8}[a-z]+\d*\.[a-z0-9]{3,4}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 講義檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.pdf')" onchange="setCustomValidity('')" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
                                     <br>
                                     <input type="file" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" id="handout_file_select" accept="application/pdf, image/png, image/jpeg" style="display:none;">
                                     <button title="Only alphanumeric filenames 講義檔名只能是英數字如YYYYMMDDname.pdf" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('handout_file_select').click()">選擇講義檔上傳 (Select a file to upload)</button>
@@ -454,7 +454,7 @@ class Audio_List_Admin {
 							</tr>
 						</tbody>
 				    </table>
-	                <input class="button button-primary" onClick="if(this.form.reportValidity()&&confirm('Are you sure to submit?')){this.form.submit(); this.disabled=true; this.value='Submitting…';} else {return false;}" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
+	                <input class="button button-primary" onClick="if(this.form.reportValidity()&&confirm('Are you sure to submit?')){this.form.submit(); this.disabled=true; this.value='Submitting…';} else {return false;}" type="submit" name="audio_submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
 	                <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
 			    </form>
 	            <?php if ($audio_id) : ?>

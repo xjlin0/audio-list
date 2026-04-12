@@ -32,7 +32,7 @@
 	$(function() {
 		// Audio file upload handling
 		const fileSelectButton = document.querySelector('button[onclick="document.getElementById(\'audio_file_select\').click()"]');
-		const audioDataSubmitButton = document.querySelector('input[name="submit"]');
+		const audioDataSubmitButton = document.querySelector('input[name="audio_submit"]');
 		const statusDiv = document.getElementById('upload_status');
 
 		// Handout file upload handling
