@@ -19,6 +19,8 @@ ul.audio-list .note-handout-container {
   align-items: flex-start;
   gap: 15px;
   flex-wrap: wrap;
+  width: 80%;
+  margin: auto;
 }
 
 ul.audio-list .note-toggle {
@@ -46,12 +48,11 @@ ul.audio-list .handout-link:hover {
 /* Note content - hidden by default, shown when details is open */
 ul.audio-list .note-content {
   display: none;
-  flex-basis: 100%;
   width: 100%;
-  order: 3;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
-ul.audio-list .note-toggle[open] ~ .note-content {
+/* When .note-toggle inside .note-handout-container is open, show the following .note-content */
+ul.audio-list .note-handout-container:has(.note-toggle[open]) ~ .note-content {
   display: block;
 }

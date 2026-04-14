@@ -154,14 +154,14 @@ class Audio_List_Public {
 								$link = trim($result->link);
 								$linkExt = strtolower(pathinfo($link, PATHINFO_EXTENSION));
 								$escapedLink = esc_url($link);
-								if (in_array($linkExt, array('pdf', 'jpg', 'jpeg', 'png', 'gif'))) {
+								if (in_array($linkExt, array('pdf', 'jpg', 'jpeg', 'png', 'apng', 'gif', 'webp', 'svg'))) {
 									$handoutContent = '<span class="handout-link-wrapper"><a href="' . $escapedLink . '" target="_blank" rel="noopener noreferrer" class="handout-link"><u>📄 按此另開圖文講義</u></a></span>';
 								}
 							}
 
 							// Wrap in flex container if either exists (handout first, then note toggle, then note content)
 							if ($noteToggle || $handoutContent) {
-								$noteAndHandout = '<div class="note-handout-container">' . $handoutContent . $noteToggle . $noteContent . '</div><br/>';
+								$noteAndHandout = '<div class="note-handout-container">' . $handoutContent . $noteToggle . '</div>';
 							}
 
 							$li = '<li id="'.($audio_id ? $audio_id : $id.md5($sermondate.$speaker.$topic.$type)).'"' . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
@@ -201,8 +201,8 @@ class Audio_List_Public {
 									<br/>
 									$youtubePlayer
 									$audioPlayer
-									<br/>
 									$noteAndHandout
+									$noteContent
 								</li>
 							EOD;
 			    }

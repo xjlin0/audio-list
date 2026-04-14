@@ -409,7 +409,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        公開註記(Public note):
+							        公開文字摘要(Public note):
 							    </td>
 							    <td>
 							        <textarea id="note" placeholder="abstract 摘要" maxlength="21845" name="note" cols="60" rows="6"><?php echo esc_attr($note_value); ?></textarea>
@@ -417,7 +417,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        內容(content):
+							        非公開內容(content):
 							    </td>
 							    <td>
 							        <textarea id="content" placeholder="transcript 逐字稿" maxlength="21845" name="content" cols="60" rows="5"><?php echo esc_attr($content_value); ?></textarea>
@@ -433,7 +433,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">公開講義連結(link)</a>:
+							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">公開圖文講義連結(link)</a>:
                                     <br><br><p style="color:green;" title="範例example:&#010;20250316yeh2.pdf">格式yyyyMMDDname.pdf</p>
 							    </td>
 							    <td>
