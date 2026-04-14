@@ -30,32 +30,6 @@
 	 */
 
 	$(function() {
-		// PDF Lazy Loading with Intersection Observer
-		// Auto-loads PDF when scrolling into view
-
-		const pdfObserver = new IntersectionObserver(entries => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					const item = entry.target;
-					const iframe = item.querySelector('.pdf-frame');
-					const src = item.dataset.src;
-
-					if (src && !iframe.src) {
-						iframe.src = src;
-					}
-					// Stop observing once loaded
-					pdfObserver.unobserve(item);
-				}
-			});
-		}, {
-			rootMargin: "300px" // Start loading 200px before visible
-		});
-
-		// Observe all PDF items
-		document.querySelectorAll('.pdf-item').forEach(item => {
-			pdfObserver.observe(item);
-		});
-
 		// YouTube Lazy Loading with Intersection Observer
 		// Auto-loads YouTube iframe when scrolling into view
 

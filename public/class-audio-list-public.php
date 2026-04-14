@@ -140,7 +140,30 @@ class Audio_List_Public {
 							$speaker = esc_html($result->speaker);
 							$type = esc_html($result->type);
 							$audio_id = htmlspecialchars($id . $filename);
-							$note = empty($result->note) ? '' : '<details><summary class="underline-pointer"><u>按此顯示/隱藏摘要</u></summary><p style="text-align:left;">'.nl2br($result->note).'</p></details><br/>';
+							// Build note and handout link section
+							$noteAndHandout = '';
+							$noteToggle = '';
+							$noteContent = '';
+							$handoutContent = '';
+
+							if (!empty($result->note)) {
+								$noteToggle = '<details class="note-toggle"><summary class="underline-pointer"><u>按此顯示/隱藏摘要</u></summary></details>';
+								$noteContent = '<div class="note-content"><p style="text-align:left;">'.nl2br($result->note).'</p></div>';
+							}
+							if (!empty($result->link)) {
+								$link = trim($result->link);
+								$linkExt = strtolower(pathinfo($link, PATHINFO_EXTENSION));
+								$escapedLink = esc_url($link);
+								if (in_array($linkExt, array('pdf', 'jpg', 'jpeg', 'png', 'gif'))) {
+									$handoutContent = '<span class="handout-link-wrapper"><a href="' . $escapedLink . '" target="_blank" rel="noopener noreferrer" class="handout-link"><u>📄 按此另開圖文講義</u></a></span>';
+								}
+							}
+
+							// Wrap in flex container if either exists (handout first, then note toggle, then note content)
+							if ($noteToggle || $handoutContent) {
+								$noteAndHandout = '<div class="note-handout-container">' . $handoutContent . $noteToggle . $noteContent . '</div><br/>';
+							}
+
 							$li = '<li id="'.($audio_id ? $audio_id : $id.md5($sermondate.$speaker.$topic.$type)).'"' . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
 							$series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
 							$section = empty($result->section) ? '<br/>' . $type . '<br/>' : '<br/>'. $type . ': <span>'. esc_html($result->section) .'</span><br/>' ;
@@ -170,29 +193,6 @@ class Audio_List_Public {
 								$audioPlayer = '<span>Unavailable 無檔案</span>';
 							}
 	
-							// Process link field for PDF/image display
-							$linkContent = '';
-							if (!empty($result->link)) {
-								$link = trim($result->link);
-								$linkExt = strtolower(pathinfo($link, PATHINFO_EXTENSION));
-								$escapedLink = esc_url($link);
-								
-								if ($linkExt === 'pdf') {
-									// PDF display using iframe
-									$linkContent = <<<PDFHTML
-										<div class="pdf-item" data-src="$escapedLink">
-											<iframe class="pdf-frame" loading="lazy"></iframe>
-										</div>
-									PDFHTML;
-								} elseif (in_array($linkExt, array('jpg', 'jpeg', 'png', 'gif'))) {
-									// Image display
-									$linkContent = '<div class="link-image-wrapper"><img src="' . $escapedLink . '" alt="附件圖片" class="link-image" /></div>';
-								} else {
-									// Other link types - display as hyperlink
-									$linkContent = '<div class="link-other"><a href="' . $escapedLink . '" target="_blank" rel="noopener noreferrer">下載附件</a></div>';
-								}
-							}
-	
 							$output .= <<<EOD
 								$li
 									$sermondate &nbsp; $topic
@@ -200,7 +200,9 @@ class Audio_List_Public {
 									$series $speaker
 									<br/>
 									$youtubePlayer
-									$audioPlayer $linkContent $note
+									$audioPlayer
+									<br/>
+									$noteAndHandout
 								</li>
 							EOD;
 			    }
