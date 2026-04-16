@@ -29,7 +29,18 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
-	$(function() {
+	$(() => {  // show/hide preview video players in iframes
+		const checkboxes = document.querySelectorAll('ul.audio-list input.video-players-switcher');
+		checkboxes.forEach(checkbox => {
+	    checkbox.addEventListener('change', (event) => {
+	    	const parentUl = event.currentTarget.closest('ul.audio-list');
+	    	const childrenVideoPlayers = parentUl.querySelectorAll('div.youtube-item');
+	      childrenVideoPlayers.forEach(childrenVideoPlayer => {
+	      	childrenVideoPlayer.style.display = event.currentTarget.checked ? 'block' : 'none';
+	      });
+	    });
+		});
+
 		// YouTube Lazy Loading with Intersection Observer
 		// Auto-loads YouTube iframe when scrolling into view
 
@@ -37,7 +48,7 @@
 			entries.forEach(entry => {
 				if (entry.isIntersecting) {
 					const item = entry.target;
-					const youtubeId = item.dataset.youtubeId;
+					const youtubeId = item && item.dataset && item.dataset.youtubeId;
 
 					// Check if iframe not already loaded
 					if (youtubeId && !item.querySelector('iframe')) {
