@@ -130,7 +130,7 @@ class Audio_List_Public {
 				  error_log( 'No audio list row available with given conditions: ' . json_encode($atts, JSON_UNESCAPED_SLASHES));
 				  $output = '<ul class="audio-list"><li>No audio available 查無資料.</li></ul>';
 			} else {
-			    $output = '<ul class="audio-list"><label><input type="checkbox" class="video-players-switcher" checked="checked">顯示崇拜錄影預覽</label>';
+			    $output = '<ul class="audio-list"><label><input type="checkbox" class="video-players-switcher" checked="checked">顯示錄影預覽</label>';
 			    foreach ($results as $index => $result) {
 							$src = htmlspecialchars($url . $result->audiofile);
 							$filenames = explode('.', $result->audiofile);
