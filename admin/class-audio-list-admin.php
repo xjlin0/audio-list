@@ -327,7 +327,7 @@ class Audio_List_Admin {
 							        經節(Section):
 							    </td>
 							    <td>
-							        <input size="60" type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
+							        <input placeholder="章節需用阿拉伯數字(456),勿用中文(四五六)或全型" size="60" type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
 							    </td>
 							</tr>
 							<tr>
