@@ -401,7 +401,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        內部備註(Internal remark):
+							        內部備註(Internal remark):<br>(不公開)
 							    </td>
 							    <td>
 							        <textarea id="remark" maxlength="255" name="remark" cols="60" rows="5"><?php echo esc_attr($remark_value); ?></textarea>
@@ -417,10 +417,10 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        非公開內容(content):
+							        非公開文字內容(content):<br>(簡化中文搜尋用)
 							    </td>
 							    <td>
-							        <textarea id="content" placeholder="transcript 逐字稿" maxlength="21845" name="content" cols="60" rows="5"><?php echo esc_attr($content_value); ?></textarea>
+							        <textarea id="content" placeholder="abstract 简体內容搜索用" maxlength="21845" name="content" cols="60" rows="5"><?php echo esc_attr($content_value); ?></textarea>
 							    </td>
 							</tr>
 							<tr>
