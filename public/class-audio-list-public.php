@@ -70,7 +70,7 @@ class Audio_List_Public {
 	 * @return string|false The video ID or false if not found
 	 */
 	private function get_youtube_id($url) {
-		$pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i';
+		$pattern = '/(?:youtube\.com\/(?:live\/|[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i';
 		if (preg_match($pattern, $url, $matches)) {
 			return $matches[1];
 		}
