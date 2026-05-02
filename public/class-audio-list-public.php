@@ -53,6 +53,29 @@ class Audio_List_Public {
     add_shortcode('audio-list', array($this, 'display_audio_list'));
 	}
 
+	/**
+	 * Helper function to detect if a URL is a YouTube link
+	 *
+	 * @param string $url The URL to check
+	 * @return bool True if URL is a YouTube link
+	 */
+	private function is_youtube_url($url) {
+		return (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false);
+	}
+
+	/**
+	 * Helper function to extract YouTube video ID from URL
+	 *
+	 * @param string $url The YouTube URL
+	 * @return string|false The video ID or false if not found
+	 */
+	private function get_youtube_id($url) {
+		$pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i';
+		if (preg_match($pattern, $url, $matches)) {
+			return $matches[1];
+		}
+		return false;
+	}
 
 	public function display_audio_list($atts) {
 	    global $wpdb;
@@ -95,7 +118,7 @@ class Audio_List_Public {
 
 	    $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
 
-	    $query = $wpdb->prepare("SELECT id, sermondate, type, section, series, audiofile, note, topic, series, speaker FROM $table_name $where_clause ORDER BY sermondate DESC", $query_params);
+	    $query = $wpdb->prepare("SELECT id, sermondate, type, section, series, audiofile, note, topic, series, speaker, link, url FROM $table_name $where_clause ORDER BY sermondate DESC", $query_params);
 
 	    $results = $wpdb->get_results($query);
 
@@ -107,7 +130,7 @@ class Audio_List_Public {
 				  error_log( 'No audio list row available with given conditions: ' . json_encode($atts, JSON_UNESCAPED_SLASHES));
 				  $output = '<ul class="audio-list"><li>No audio available 查無資料.</li></ul>';
 			} else {
-			    $output = '<ul class="audio-list">';
+			    $output = '<ul class="audio-list"><label><input type="checkbox" class="video-players-switcher" checked="checked">顯示錄影預覽</label>';
 			    foreach ($results as $index => $result) {
 							$src = htmlspecialchars($url . $result->audiofile);
 							$filenames = explode('.', $result->audiofile);
@@ -117,10 +140,48 @@ class Audio_List_Public {
 							$speaker = esc_html($result->speaker);
 							$type = esc_html($result->type);
 							$audio_id = htmlspecialchars($id . $filename);
-							$note = empty($result->note) ? '' : '<details><summary class="underline-pointer"><u>按此顯示/隱藏摘要</u></summary><p style="text-align:left;">'.nl2br($result->note).'</p></details><br/>';
+							// Build note and handout link section
+							$noteAndHandout = '';
+							$noteToggle = '';
+							$noteContent = '';
+							$handoutContent = '';
+
+							if (!empty($result->note)) {
+								$noteToggle = '<details class="note-toggle"><summary class="underline-pointer"><u>按此顯示/隱藏摘要</u></summary></details>';
+								$noteContent = '<div class="note-content"><p style="text-align:left;">'.nl2br($result->note).'</p></div>';
+							}
+							if (!empty($result->link)) {
+								$link = trim($result->link);
+								$linkExt = strtolower(pathinfo($link, PATHINFO_EXTENSION));
+								$escapedLink = esc_url($link);
+								if (in_array($linkExt, array('pdf', 'jpg', 'jpeg', 'png', 'apng', 'gif', 'webp', 'svg'))) {
+									$handoutContent = '<span class="handout-link-wrapper"><a href="' . $escapedLink . '" target="_blank" rel="noopener noreferrer" class="handout-link"><u>📄 按此另開圖文講義</u></a></span>';
+								}
+							}
+
+							// Wrap in flex container if either exists (handout first, then note toggle, then note content)
+							if ($noteToggle || $handoutContent) {
+								$noteAndHandout = '<div class="note-handout-container">' . $handoutContent . $noteToggle . '</div>';
+							}
+
 							$li = '<li id="'.($audio_id ? $audio_id : $id.md5($sermondate.$speaker.$topic.$type)).'"' . ($stripeStyle && $index % 2 == 0 ? ' style="' . $stripeStyle . '">' : '>');
 							$series = empty($result->series) ? '' : esc_html($result->series) . '&nbsp; 系列&nbsp;&nbsp;';
 							$section = empty($result->section) ? '<br/>' . $type . '<br/>' : '<br/>'. $type . ': <span>'. esc_html($result->section) .'</span><br/>' ;
+
+							// Build YouTube player if url field contains YouTube link (lazy load)
+							$youtubePlayer = '';
+							if (!empty($result->url) && $this->is_youtube_url($result->url)) {
+								$youtube_id = $this->get_youtube_id($result->url);
+								if ($youtube_id) {
+									$youtubePlayer = <<<EOT
+										<div class="youtube-item" data-youtube-id="$youtube_id" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin-bottom: 10px; background: #000;">
+											<div class="youtube-placeholder" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 14px;">▶ 載入中...</div>
+										</div>
+									EOT;
+								}
+							}
+
+							// Build audio player (always show if audiofile exists)
 							if ($result->audiofile) {
 								$audioPlayer = <<<EOT
 									<audio style="$audioStyle" preload="none" controls>
@@ -131,14 +192,17 @@ class Audio_List_Public {
 							} else {
 								$audioPlayer = '<span>Unavailable 無檔案</span>';
 							}
-
+	
 							$output .= <<<EOD
 								$li
 									$sermondate &nbsp; $topic
 									$section
 									$series $speaker
 									<br/>
-									$audioPlayer $note
+									$youtubePlayer
+									$audioPlayer
+									$noteAndHandout
+									$noteContent
 								</li>
 							EOD;
 			    }

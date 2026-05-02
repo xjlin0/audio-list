@@ -11,3 +11,48 @@ ul.audio-list summary.underline-pointer {
 ul.audio-list {
   list-style-type: none;
 }
+
+/* Note and Handout Section - flexbox with space-between */
+ul.audio-list .note-handout-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  flex-wrap: wrap;
+  width: 80%;
+  margin: auto;
+}
+
+ul.audio-list .note-toggle {
+  flex: 0 0 auto;
+}
+
+ul.audio-list .note-toggle summary {
+  white-space: nowrap;
+}
+
+ul.audio-list .handout-link-wrapper {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+ul.audio-list .handout-link {
+  color: #0073aa;
+  cursor: pointer;
+}
+
+ul.audio-list .handout-link:hover {
+  color: #005177;
+}
+
+/* Note content - hidden by default, shown when details is open */
+ul.audio-list .note-content {
+  display: none;
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* When .note-toggle inside .note-handout-container is open, show the following .note-content */
+ul.audio-list .note-handout-container:has(.note-toggle[open]) ~ .note-content {
+  display: block;
+}

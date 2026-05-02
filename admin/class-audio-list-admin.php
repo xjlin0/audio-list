@@ -86,7 +86,7 @@ class Audio_List_Admin {
 
     public function custom_select_audio_page() {
         global $wpdb;
-        $audioList = $wpdb->get_results("SELECT id, note, url, audiofile, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
+        $audioList = $wpdb->get_results("SELECT id, note, url, link, audiofile, activeFlag, sermondate, series, speaker, topic, section, type, location, remark FROM wp_audio_list ORDER BY sermondate DESC, type, topic, updatedTime DESC");
         $params = array();
         parse_str($_SERVER['QUERY_STRING'], $params);
         $circle = $params['circle'] ?? null;
@@ -102,15 +102,15 @@ class Audio_List_Admin {
                     <tr>
                         <th>日期(Date)</th>
                         <th>講員(Speaker)</th>
-                        <th title="Abstract included?">📄 主題/系列(Topic & series)</th>
+                        <th title="Summary included?">✍🏻 主題/系列(Topic & series)</th>
                         <th title="Video link included?">📹 經節(Section)</th>
-                        <th>類型/地點 (Type & location)</th>
+                        <th title="Handout included?">📄 類型/地點 (Type & location)</th>
                         <th>操作(Operation)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($audioList as $audio) : 
-                    $topicAndSeries = (empty($audio->note) ? '☐' : '☑') . esc_html($audio->topic). ' ' . esc_html($audio->series);
+                    $topicAndSeries = (empty($audio->note) ? '☐' : '✍🏻') . esc_html($audio->topic). ' ' . esc_html($audio->series);
                     $trStyle = '';
                     if (empty($audio->audiofile)) {
                         $topicAndSeries = '(Unavailable) ' . $topicAndSeries;
@@ -119,8 +119,8 @@ class Audio_List_Admin {
                             <td><?php echo esc_html($audio->sermondate); ?></td>
                             <td><?php echo esc_html($audio->speaker); ?></td>
                             <td><?php echo $topicAndSeries; ?></td>
-                            <td><?php echo (empty($audio->url) ? '☐' : '☑') . esc_html($audio->section); ?></td>
-                            <td><?php echo esc_html($audio->type) . ' ' . esc_html($audio->location); ?></td>
+                            <td><?php echo (empty($audio->url) ? '☐' : '📹') . esc_html($audio->section); ?></td>
+                            <td><?php echo (empty($audio->link) ? '☐' : '📄') . esc_html($audio->type) . ' ' . esc_html($audio->location); ?></td>
                             <td>
                                 <a class="button <?php echo($audio->activeFlag === 'Active' ? 'button-primary': 'button-primary red'); ?>" href="<?php echo admin_url('admin.php?page=custom-audio-list&id=' . $audio->id); ?>">Edit</a>
 					            <?php if (!empty($audio->remark)) : ?>
@@ -161,6 +161,7 @@ class Audio_List_Admin {
         <div class="wrap">
             <h1><?php echo get_bloginfo('description'); ?></h1>
             <h2>Hello! <?php  echo wp_get_current_user()->display_name; ?></h2>
+            <p>若需修改程式碼，請至<a href="https://github.com/xjlin0/audio-list" target="_blank">audio-list plugin</a></p>
             <br>
             <button class="button button-primary" onclick="location.href='<?php echo admin_url('admin.php?page=custom-audio-list'); ?>'" title="Create audio record">1.新增錄音資料 (Create audio record)</button>
             <br><br>
@@ -326,7 +327,7 @@ class Audio_List_Admin {
 							        經節(Section):
 							    </td>
 							    <td>
-							        <input size="60" type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
+							        <input title="例: 馬太福音5:3 而不是馬太福音五:三, 約翰二書3節而不是約翰二書三節" placeholder="章節需用阿拉伯數字(456),勿用中文(四五六)或全型" size="60" type="text" maxlength="255" name="section" value="<?php echo esc_attr($section_value); ?>">
 							    </td>
 							</tr>
 							<tr>
@@ -367,13 +368,13 @@ class Audio_List_Admin {
 							    <td>
 							        <input size="60" placeholder="Please fill or select a file 請填寫或選檔上傳,檔名YYYYMMDDname.mp3不能有中文或空白"
                                         title="For the opration we can't make this required but please fill it when possible. Titles will be automatically labelled as (Unavailable) without filenames. 為作業方便此欄能留空, 但請盡量填寫, 如不填寫網頁上標題會被標記(Unavailable 無檔案)"
-                                        type="text" maxlength="255" name="audiofile" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.mp3')" onchange="setCustomValidity('')"
+                                        type="text" maxlength="255" name="audiofile" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 錄音檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.mp3')" onchange="setCustomValidity('')"
                                         value="<?php echo esc_attr($audiofile_value); ?>" 
                                         id="audiofile_input">
                                     <span class="fielderror">*</span>
                                     <br>
                                     <input type="file" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" id="audio_file_select" accept="audio/mpeg, audio/wav, audio/ogg" style="display:none;">
-                                    <button title="Only alphanumeric filenames 檔名只能是英數字如YYYYMMDDname.mp3" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇音訊檔上傳 (Select a file to upload)</button>
+                                    <button title="Only alphanumeric filenames 錄音檔名只能是英數字如YYYYMMDDname.mp3" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇音訊檔上傳 (Select a file to upload)</button>
                                     <span class="vertical-baseline-middle" id="upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
@@ -400,7 +401,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        內部備註(Internal remark):
+							        內部備註(Internal remark):<br>(不公開)
 							    </td>
 							    <td>
 							        <textarea id="remark" maxlength="255" name="remark" cols="60" rows="5"><?php echo esc_attr($remark_value); ?></textarea>
@@ -408,7 +409,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        公開註記(Public note):
+							        公開文字摘要(Public note):
 							    </td>
 							    <td>
 							        <textarea id="note" placeholder="abstract 摘要" maxlength="21845" name="note" cols="60" rows="6"><?php echo esc_attr($note_value); ?></textarea>
@@ -416,15 +417,15 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        內容(content):
+							        非公開文字內容(content):<br>(簡化中文搜尋用)
 							    </td>
 							    <td>
-							        <textarea id="content" placeholder="transcript 逐字稿" maxlength="21845" name="content" cols="60" rows="5"><?php echo esc_attr($content_value); ?></textarea>
+							        <textarea id="content" placeholder="abstract 简体內容搜索用" maxlength="21845" name="content" cols="60" rows="5"><?php echo esc_attr($content_value); ?></textarea>
 							    </td>
 							</tr>
 							<tr>
 								<td align="right">
-							        <a href="<?php echo(empty($url_value) ? '#' : esc_attr($url_value)); ?>">網址(url)</a>:
+							        <a href="<?php echo(empty($url_value) ? '#' : esc_attr($url_value)); ?>">公開錄影網址(url)</a>:
 							    </td>
 							    <td>
 							        <input type="text" size="60" placeholder="youtube url" maxlength="100" name="url" value="<?php echo esc_attr($url_value); ?>">
@@ -432,10 +433,15 @@ class Audio_List_Admin {
 							</tr>
 							<tr>
 								<td align="right">
-							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">連結(link)</a>:
+							        <a href="<?php echo(empty($link_value) ? '#' : esc_attr($link_value)); ?>">公開圖文講義連結(link)</a>:
+                                    <br><br><p style="color:green;" title="範例example:&#010;20250316yeh2.pdf">格式yyyyMMDDname.pdf</p>
 							    </td>
 							    <td>
-							        <input type="text" size="60" placeholder="picture link 圖片連結" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
+							        <input type="text" size="60" id="handoutfile_select" title="只能選單一個公開講義檔案" placeholder="Please select a file 請選檔上傳,檔名YYYYMMDDname.pdf/jpg/gif/png等,不能有中文或空白" pattern="^https?://.+/\d{8}[a-z]+\d*\.[a-z0-9]{3,4}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 講義檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.pdf')" onchange="setCustomValidity('')" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
+                                    <br>
+                                    <input type="file" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" id="handout_file_select" accept="application/pdf, image/png, image/jpeg" style="display:none;">
+                                    <button title="Only alphanumeric filenames 講義檔名只能是英數字如YYYYMMDDname.pdf" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('handout_file_select').click()">選擇講義檔上傳 (Select a file to upload)</button>
+                                    <span class="vertical-baseline-middle" id="handout_upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
 							<tr>
@@ -448,7 +454,7 @@ class Audio_List_Admin {
 							</tr>
 						</tbody>
 				    </table>
-	                <input class="button button-primary" onClick="if(this.form.reportValidity()&&confirm('Are you sure to submit?')){this.form.submit(); this.disabled=true; this.value='Submitting…';} else {return false;}" type="submit" name="submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
+	                <input class="button button-primary" onClick="if(this.form.reportValidity()&&confirm('Are you sure to submit?')){this.form.submit(); this.disabled=true; this.value='Submitting…';} else {return false;}" type="submit" name="audio_submit" value="<?php echo $audio_id ? 'Update' : 'Submit'; ?>">
 	                <a class="button linkbutton orange" href="<?php echo admin_url('admin.php?page=audio-list-admin'); ?>">Go Back</a>
 			    </form>
 	            <?php if ($audio_id) : ?>
@@ -466,145 +472,6 @@ class Audio_List_Admin {
 		        <?php endif; ?>
 		    </div>
         </div>
-        <script>
-        const fileSelectButton = document.querySelector('button[onclick="document.getElementById(\'audio_file_select\').click()"]');
-        const audioDataSubmitButton = document.querySelector('input[name="submit"]');
-        const statusDiv = document.getElementById('upload_status');
-
-        const uploadFile = async function() {
-            const file = document.getElementById('audio_file_select').files[0];
-            const sermonDate = document.querySelector('input[name="sermondate"]').value;
-            const year = sermonDate.split('-')[0];
-            const audioPreviewTr = document.querySelector('tr#audio-preview');
-
-            // Disable both buttons during upload
-            fileSelectButton.disabled = true;
-
-            try {
-                // Check if file exists
-                const formData = new FormData();
-                formData.append('action', 'check_aws_file');
-                formData.append('nonce', audioListAjax.nonce);
-                formData.append('year', year);
-                formData.append('filename', encodeURIComponent(file.name));
-
-                try {
-                    console.log('Checking file:', {year, filename: file.name});
-                    const response = await fetch(audioListAjax.ajaxurl, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const text = await response.text();  // Get response as text first
-                    console.log('Raw response:', text);
-                    
-                    let data;
-                    try {
-                        data = JSON.parse(text);  // Then parse it
-                    } catch (e) {
-                        console.error('JSON parse error:', e);
-                        throw new Error('Invalid server response format ' + text);
-                    }
-
-                    console.log('Parsed response:', data);
-
-                    if (data.success) {
-                        if (data.data.exists) {
-                            if (!confirm('File already exists. Do you want to overwrite it?')) {
-                                statusDiv.textContent = 'Upload aborted (file exists)';
-                                statusDiv.style.color = 'grey';
-                                fileSelectButton.disabled = false;
-                                return data;
-                            }
-                        }
-                        
-                        // Upload file
-                        statusDiv.textContent = 'Uploading...';
-                        const uploadData = new FormData();
-                        uploadData.append('action', 'upload_to_aws');
-                        uploadData.append('nonce', audioListAjax.nonce);
-                        uploadData.append('year', year);
-                        uploadData.append('file', file);
-
-                        const uploadResponse = await fetch(audioListAjax.ajaxurl, {
-                            method: 'POST',
-                            body: uploadData
-                        });
-                        const uploadText = await uploadResponse.text();
-                        console.log('Upload response text:', uploadText);
-                        
-                        const uploadResult = JSON.parse(uploadText);
-                        console.log('Upload result:', uploadResult);
-
-                        if (uploadResult.success) {
-                            statusDiv.textContent = 'Uploaded successful! Please Submit/Update';
-                            statusDiv.style.color = 'green';
-                            fileSelectButton.disabled = false;
-                            audioPreviewTr.removeAttribute('hidden');
-                            const audioPreview = audioPreviewTr.querySelector('audio');
-                            audioPreview.src = uploadResult.data.url;
-                            audioPreview.load();
-                            const audioPreviewA = audioPreviewTr.querySelector('a');
-                            audioPreviewA.href += year;
-                            return uploadResult;
-                        } else {
-                            throw new Error(uploadResult.data || 'Upload failed');
-                        }
-                    } else {
-                        throw new Error(data.data?.message || 'Check failed');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    statusDiv.textContent = 'Upload failed: ' + error.message;
-                    statusDiv.style.color = 'red';
-                    // Re-enable buttons on error
-                    fileSelectButton.disabled = false;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                statusDiv.textContent = 'Upload failed: ' + error.message;
-                statusDiv.style.color = 'red';
-                // Re-enable buttons on error
-                fileSelectButton.disabled = false;
-            }
-        }
-
-        document.getElementById('audio_file_select').addEventListener('change', function(e) {
-            const alphanumericRegex = /^\d{8}[a-z]+\d*\.[a-z0-9]{3}$/;
-            const file = e.target.files[0];
-            const sermonDate = document.querySelector('input[name="sermondate"]').value;
-            const year = sermonDate.split('-')[0];
-            const previousFilename = document.getElementById('audiofile_input').value;
-            if (file) {
-                console.log("file name: ", file.name);
-                if (!alphanumericRegex.test(file.name)) {
-                    alert("Only alphanumeric filenames allowed 檔名不能有中文或空白, 只能是小寫英數字如 YYYYMMDDname.mp3");
-                    document.getElementById('audio_file_select').value = '';
-                    return;
-                }
-                document.getElementById('audiofile_input').value = file.name;
-                setTimeout(() => {  // confirm() is a blocking operation stopping the above DOM alteration
-                    if (year && confirm(`Do you want to ${previousFilename ? 'replace ' + previousFilename + ' and ' : ''}upload the file ${file.name} to ${year} folder?`)) {
-                        audioDataSubmitButton.disabled = true;
-                        uploadFile()
-                            .then((result) => {
-                                console.log('executed uploadFile(), result: ', result);
-                            })
-                            .catch((error) => {
-                                console.error('An error occurred while calling uploadFile():', error);
-                            })
-                            .finally(() => {
-                                audioDataSubmitButton.disabled = false;
-                            });
-                    } else if (previousFilename) {
-                        document.getElementById('audiofile_input').value = previousFilename;
-                    } else {
-                        statusDiv.textContent = 'You chose not to upload the file';
-                    }
-                    document.getElementById('audio_file_select').value = '';
-                }, 1)
-            }
-        });
-        </script>
         <?php
     }
 

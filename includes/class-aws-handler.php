@@ -32,14 +32,26 @@ class AWS_Handler {
 
     public function upload_file($year, $file) {
         $key = "restructure_sermon/$year/" . sanitize_file_name($file['name']);
-        
+
+        // Determine Content-Type and Content-Disposition
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $contentType = $file['type'] ?? 'application/octet-stream';
+
+        // For PDF files, set Content-Disposition to inline to display in browser
+        $uploadParams = [
+            'Bucket' => $this->bucket,
+            'Key'    => $key,
+            'SourceFile' => $file['tmp_name'],
+            'ACL'    => 'public-read',
+            'ContentType' => $contentType,
+        ];
+
+        if ($extension === 'pdf') {
+            $uploadParams['ContentDisposition'] = 'inline';
+        }
+
         try {
-            $result = $this->s3->putObject([
-                'Bucket' => $this->bucket,
-                'Key'    => $key,
-                'SourceFile' => $file['tmp_name'],
-                'ACL'    => 'public-read',
-            ]);
+            $result = $this->s3->putObject($uploadParams);
             return $result['ObjectURL'];
         } catch (Exception $e) {
             throw new Exception('Upload failed: ' . $e->getMessage());
