@@ -1,7 +1,7 @@
 <?php
 
-use Aws\S3\S3Client;
-use Aws\Exception\AwsException;
+use AsyncAws\S3\S3Client;
+use AsyncAws\Core\Exception\Exception as AsyncAwsException;
 
 /**
  * The admin-specific functionality of the plugin.
