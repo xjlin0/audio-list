@@ -34,18 +34,6 @@ class Audio_List_Admin {
         $this->version = $version;
         $this->aws_handler = null;
 
-        if (defined('AS3CF_SETTINGS') && !empty(AS3CF_SETTINGS)) {
-            $aws_settings = unserialize(AS3CF_SETTINGS);
-
-            if (isset($aws_settings['provider'], $aws_settings['access-key-id'], $aws_settings['secret-access-key'])) {
-                $this->aws_handler = new AWS_Handler();
-            } else {
-                error_log('AWS configuration is incomplete or invalid.');
-            }
-        } else {
-            error_log('AS3CF_SETTINGS is not defined in wp-config.php.');
-        }
-
         add_action('admin_menu', array($this, 'add_plugin_menu_pages'));
         add_action('admin_post_custom_audio_list_form_submit', array($this, 'process_audio_list_form_submission'));
         add_action('admin_init', array($this, 'handle_form_submission'));
@@ -53,6 +41,50 @@ class Audio_List_Admin {
         add_action('admin_init', array($this, 'handle_custom_audio_list_get_schema'));
         add_action('wp_ajax_check_aws_file', array($this, 'check_aws_file'));
         add_action('wp_ajax_upload_to_aws', array($this, 'upload_to_aws'));
+    }
+
+    /**
+     * Lazy load the AWS Handler.
+     *
+     * @return AWS_Handler|null
+     */
+    private function get_aws_handler() {
+        if ($this->aws_handler !== null) {
+            return $this->aws_handler;
+        }
+
+        if (defined('AS3CF_SETTINGS') && !empty(AS3CF_SETTINGS)) {
+            $aws_settings = unserialize(AS3CF_SETTINGS);
+
+            if (isset($aws_settings['provider'], $aws_settings['access-key-id'], $aws_settings['secret-access-key'])) {
+                $this->aws_handler = new AWS_Handler();
+                return $this->aws_handler;
+            } else {
+                error_log('AWS configuration is incomplete or invalid.');
+            }
+        } else {
+            error_log('AS3CF_SETTINGS is not defined in wp-config.php.');
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if AWS is configured without instantiating the handler.
+     *
+     * @return bool
+     */
+    private function is_aws_configured() {
+        if ($this->aws_handler !== null) {
+            return true;
+        }
+
+        if (defined('AS3CF_SETTINGS') && !empty(AS3CF_SETTINGS)) {
+            $aws_settings = unserialize(AS3CF_SETTINGS);
+            return isset($aws_settings['provider'], $aws_settings['access-key-id'], $aws_settings['secret-access-key']);
+        }
+
+        return false;
     }
 
     public function add_plugin_menu_pages() {
@@ -374,8 +406,8 @@ class Audio_List_Admin {
                                     <span class="fielderror">*</span>
                                     <br>
                                     <input type="file" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" id="audio_file_select" accept="audio/mpeg, audio/wav, audio/ogg" style="display:none;">
-                                    <button title="Only alphanumeric filenames 錄音檔名只能是英數字如YYYYMMDDname.mp3" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('audio_file_select').click()">選擇音訊檔上傳 (Select a file to upload)</button>
-                                    <span class="vertical-baseline-middle" id="upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
+                                    <button title="Only alphanumeric filenames 錄音檔名只能是英數字如YYYYMMDDname.mp3" type="button" class="button" <?php disabled(!$this->is_aws_configured()); ?> onclick="document.getElementById('audio_file_select').click()">選擇音訊檔上傳 (Select a file to upload)</button>
+                                    <span class="vertical-baseline-middle" id="upload_status"><?php echo esc_html($this->is_aws_configured() ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
 							<tr id="audio-preview" <?php echo esc_attr(isset($audio) ? '' : 'hidden'); ?>>
@@ -440,8 +472,8 @@ class Audio_List_Admin {
 							        <input type="text" size="60" id="handoutfile_select" title="只能選單一個公開講義檔案" placeholder="Please select a file 請選檔上傳,檔名YYYYMMDDname.pdf/jpg/gif/png等,不能有中文或空白" pattern="^https?://.+/\d{8}[a-z]+\d*\.[a-z0-9]{3,4}$" oninvalid="setCustomValidity('Only alphanumeric filenames allowed 講義檔名不能有中文或空白,只能是小寫英數字如 YYYYMMDDname.pdf')" onchange="setCustomValidity('')" maxlength="400" name="link" value="<?php echo esc_attr($link_value); ?>">
                                     <br>
                                     <input type="file" pattern="^\d{8}[a-z]+\d*\.[a-z0-9]{3}$" id="handout_file_select" accept="application/pdf, image/png, image/jpeg" style="display:none;">
-                                    <button title="Only alphanumeric filenames 講義檔名只能是英數字如YYYYMMDDname.pdf" type="button" class="button <?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'hidden'); ?>" onclick="document.getElementById('handout_file_select').click()">選擇講義檔上傳 (Select a file to upload)</button>
-                                    <span class="vertical-baseline-middle" id="handout_upload_status"><?php echo esc_attr(isset($this->aws_handler) && $this->aws_handler ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
+                                    <button title="Only alphanumeric filenames 講義檔名只能是英數字如YYYYMMDDname.pdf" type="button" class="button" <?php disabled(!$this->is_aws_configured()); ?> onclick="document.getElementById('handout_file_select').click()">選擇講義檔上傳 (Select a file to upload)</button>
+                                    <span class="vertical-baseline-middle" id="handout_upload_status"><?php echo esc_html($this->is_aws_configured() ? '' : 'AWS credentials not defined, files cannot be uploaded directly'); ?></span>
 							    </td>
 							</tr>
 							<tr>
@@ -632,8 +664,14 @@ class Audio_List_Admin {
         $year = sanitize_text_field($_POST['year']);
         $filename = urldecode(sanitize_text_field($_POST['filename']));
 
+        $handler = $this->get_aws_handler();
+        if (!$handler) {
+            wp_send_json_error('AWS Handler not available. Please set your S3 key in wp_config.php settings of AS3CF_SETTINGS');
+            return;
+        }
+
         try {
-            $exists = $this->aws_handler->check_file_exists($year, $filename);
+            $exists = $handler->check_file_exists($year, $filename);
             wp_send_json_success(['exists' => $exists]);
         } catch (Exception $e) {
             wp_send_json_error($e->getMessage());
@@ -645,9 +683,15 @@ class Audio_List_Admin {
             wp_send_json_error('Invalid nonce');
         }
 
+        $handler = $this->get_aws_handler();
+        if (!$handler) {
+            wp_send_json_error('AWS Handler not available. Please set your S3 key in wp_config.php settings of AS3CF_SETTINGS');
+            return;
+        }
+
         try {
             $year = sanitize_text_field($_POST['year']);
-            $url = $this->aws_handler->upload_file($year, $_FILES['file']);
+            $url = $handler->upload_file($year, $_FILES['file']);
             wp_send_json_success(['url' => $url]);
         } catch (Exception $e) {
             wp_send_json_error($e->getMessage());
