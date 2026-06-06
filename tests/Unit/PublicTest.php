@@ -121,6 +121,7 @@ class PublicTest extends TestCase {
         $query_mock = Mockery::mock('\WP_Query');
         $query_mock->shouldReceive('is_main_query')->andReturn(true);
         $query_mock->shouldReceive('is_search')->andReturn(true);
+        $query_mock->shouldReceive('get')->with('s')->andReturn('Jesus');
 
         $mock_result = (object)[
             'sermondate' => '2026-06-05',
