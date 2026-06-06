@@ -85,6 +85,45 @@ class AwsHandlerTest extends TestCase {
         $this->assertFalse($handler->check_file_exists('2026', 'missing.mp3'));
     }
 
+    public function test_constructor_uses_correct_config_keys() {
+        // We want to verify that the handler correctly maps 'secret-access-key' from settings
+        // to 'accessKeySecret' for AsyncAws.
+        
+        Functions\expect('get_option')
+            ->once()
+            ->with('aws_settings')
+            ->andReturn([
+                'access-key-id' => 'my-id',
+                'secret-access-key' => 'my-secret'
+            ]);
+
+        // We use a helper class to inspect the internal state after construction
+        $handler = new class extends AWS_Handler {
+            public function __construct() {
+                parent::__construct();
+            }
+            public function getS3Config() {
+                // This is a bit of a hack to test the private/protected state 
+                // but necessary to verify the constructor logic.
+                // In AsyncAws, the configuration is stored inside the client.
+                $reflect = new \ReflectionClass($this->s3);
+                $prop = $reflect->getProperty('configuration');
+                $prop->setAccessible(true);
+                $config = $prop->getValue($this->s3);
+                
+                $reflectConfig = new \ReflectionClass($config);
+                $userDataProp = $reflectConfig->getProperty('userData');
+                $userDataProp->setAccessible(true);
+                return $userDataProp->getValue($config);
+            }
+        };
+
+        $config = $handler->getS3Config();
+        $this->assertEquals('my-id', $config['accessKeyId']);
+        $this->assertEquals('my-secret', $config['accessKeySecret']);
+        $this->assertArrayNotHasKey('secretAccessKey', $config, 'Should NOT use secretAccessKey');
+    }
+
     public function test_upload_file_returns_url_on_success() {
         $s3Mock = Mockery::mock(S3Client::class);
         $resultMock = Mockery::mock(\AsyncAws\S3\Result\PutObjectOutput::class);

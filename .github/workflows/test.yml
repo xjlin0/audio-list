@@ -21,4 +21,4 @@ jobs:
       run: composer install --no-interaction --no-progress
 
     - name: Run PHPUnit
-      run: vendor/bin/phpunit
+      run: php vendor/bin/phpunit
