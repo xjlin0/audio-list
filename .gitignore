@@ -1,25 +1,18 @@
 # PHP / Composer
-# INCLUDE production vendor for "plug-and-play"
-vendor/
-!vendor/**/
-!vendor/**/*.php
-!vendor/**/*.json
+# 1. Allow the vendor directory itself so Git scans it
+!vendor/
 
-# EXCLUDE Development/Testing tools (Huge volume of files)
-vendor/phpunit/
-vendor/mockery/
-vendor/brain/
-vendor/hamcrest/
-vendor/myclabs/
-vendor/nikic/
-vendor/phar-io/
-vendor/sebastian/
-vendor/theseer/
-vendor/antecedent/
-vendor/staabm/
-vendor/bin/
+# 2. Ignore everything inside vendor by default
+vendor/*
 
-# Exclude obvious bloat within production packages
+# 3. Explicitly ALLOW production-essential directories and files
+!vendor/autoload.php
+!vendor/composer/
+!vendor/async-aws/
+!vendor/symfony/
+!vendor/psr/
+
+# 4. EXCLUDE huge development/testing bloat inside those allowed folders
 vendor/**/tests/
 vendor/**/test/
 vendor/**/Test/
@@ -31,7 +24,7 @@ vendor/**/.github/
 vendor/**/CHANGELOG*
 vendor/**/CONTRIBUTING*
 
-# PHP environment
+# PHP environment artifacts
 composer.phar
 .phpunit.result.cache
 patchwork.json
