@@ -17,7 +17,7 @@ class AWS_Handler {
         $this->s3 = new S3Client([
             'region'  => 'us-west-1',
             'accessKeyId' => $aws_settings['access-key-id'],
-            'secretAccessKey' => $aws_settings['secret-access-key'],
+            'accessKeySecret' => $aws_settings['secret-access-key'],
         ]);
     }
 
