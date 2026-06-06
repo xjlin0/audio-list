@@ -1,5 +1,5 @@
 # Plugin Name
-Contributors: Jack, Jason  
+Contributors: Dennis,　Jack, Jason
 Link: https://xjlin0.github.io/  
 Tags: audio, player  
 Requires at least: 6.5  
