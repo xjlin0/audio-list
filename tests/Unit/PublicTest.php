@@ -89,7 +89,7 @@ class PublicTest extends TestCase {
             'topic' => 'Test Topic',
             'speaker' => 'Test Speaker',
             'link' => 'https://example.com/handout.pdf',
-            'url' => 'https://youtube.com/watch?v=123'
+            'url' => 'https://youtube.com/watch?v=dQw4w9WgXcQ'
         ];
 
         $wpdb->shouldReceive('prepare')->andReturn('MOCKED QUERY');

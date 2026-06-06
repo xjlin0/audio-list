@@ -48,7 +48,7 @@ class Audio_List_Admin {
      *
      * @return AWS_Handler|null
      */
-    private function get_aws_handler() {
+    protected function get_aws_handler() {
         if ($this->aws_handler !== null) {
             return $this->aws_handler;
         }
