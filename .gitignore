@@ -1,9 +1,32 @@
+# PHP / Composer
+# Temporarily being more permissive to ensure all composer-added files are tracked
+vendor/
+!vendor/**/
+!vendor/**/*.php
+!vendor/**/*.json
+
+# Exclude obvious bloat while keeping code
+vendor/**/tests/
+vendor/**/test/
+vendor/**/Test/
+vendor/**/Documentation/
+vendor/**/docs/
+vendor/**/*.md
+vendor/**/phpunit.xml*
+vendor/**/.github/
+vendor/**/CHANGELOG*
+vendor/**/CONTRIBUTING*
+
+# PHP environment
+composer.phar
+.phpunit.result.cache
+
 # PhpStorm
 .idea
 
 # Various overrides
 docker-compose.override.yml
-phpunit.*.xml
+phpunit.xml
 wp-cli.local.yml
 
 # OS-generated files
