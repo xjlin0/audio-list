@@ -62,12 +62,12 @@ class Audio_List_Public {
 	 * @return array Modified array of posts.
 	 */
 	public function inject_audio_search_results($posts, $query) {
-		if (!$query->is_main_query() || !$query->is_search() || is_admin()) {
+		if (!$query->is_main_query() || !$query->is_search()) {
 			return $posts;
 		}
 
 		global $wpdb;
-		$search_term = get_search_query();
+		$search_term = $query->get('s');
 		if (empty($search_term)) {
 			return $posts;
 		}
@@ -79,15 +79,15 @@ class Audio_List_Public {
 			"SELECT sermondate, type, section, series, audiofile, topic, speaker 
 			 FROM $table_name 
 			 WHERE activeFlag = 'Active' 
-			 AND (topic LIKE %s OR note LIKE %s OR content LIKE %s OR series LIKE %s OR section LIKE %s)　
+			 AND (topic LIKE %s OR note LIKE %s OR content LIKE %s OR series LIKE %s OR section LIKE %s)
 			 ORDER BY (
 				CASE 
-					WHEN topic LIKE %s THEN 1　
-					WHEN section LIKE %s THEN 2　
-					WHEN series LIKE %s THEN 3　
-					WHEN note LIKE %s THEN 4　
-					WHEN content LIKE %s THEN 5　
-					ELSE 6　
+					WHEN topic LIKE %s THEN 1
+					WHEN section LIKE %s THEN 2
+					WHEN series LIKE %s THEN 3
+					WHEN note LIKE %s THEN 4
+					WHEN content LIKE %s THEN 5
+					ELSE 6
 				END
 			 ) ASC, sermondate DESC",
 			$like_term, $like_term, $like_term, $like_term, $like_term,
@@ -116,7 +116,7 @@ class Audio_List_Public {
 
 			$clean_filename = !empty($row->audiofile) ? substr($row->audiofile, 0, strrpos($row->audiofile, '.')) : '';
 			$url = $subfolder . '/sermon-' . $year . '/#' . $clean_filename;
-
+			
 			$display_title = sprintf(
 				'<strong>%s</strong> - %s - %s %s (%s)',
 				esc_html($date_val),
@@ -139,7 +139,7 @@ class Audio_List_Public {
 
 		// Create mock post object
 		$mock_post = new \stdClass();
-		$mock_post->ID = -1628; // Unique negative ID
+		$mock_post->ID = -1628; 
 		$mock_post->post_author = 1;
 		$mock_post->post_date = current_time('mysql');
 		$mock_post->post_date_gmt = current_time('mysql', 1);
@@ -164,8 +164,23 @@ class Audio_List_Public {
 		$mock_post->comment_count = 0;
 		$mock_post->filter = 'raw';
 
+		$wp_post = new \WP_Post($mock_post);
+
+		// Ensure posts is an array
+		if (!is_array($posts)) {
+			$posts = array();
+		}
+
 		// Prepend the mock post
-		array_unshift($posts, new \WP_Post($mock_post));
+		array_unshift($posts, $wp_post);
+
+		// Update query counts to avoid hiding other results in the loop
+		$query->post_count = count($posts);
+		if ($query->found_posts > 0) {
+			$query->found_posts++;
+		} else {
+			$query->found_posts = 1;
+		}
 
 		return $posts;
 	}
@@ -207,12 +222,12 @@ class Audio_List_Public {
 	    ), $atts);
 
 	    $sermondate = isset($atts['sermondate']) ? sanitize_text_field($atts['sermondate']) : '';
-		$type = isset($atts['type']) ? sanitize_text_field($atts['type']) : '';
-		$series = isset($atts['series']) ? sanitize_text_field($atts['series']) : '';
-		$url = isset($atts['url']) ? esc_url($atts['url']) : '';
-		$audioStyle = isset($atts['audio_style']) ? sanitize_text_field($atts['audio_style']) : '';
-		$id = isset($atts['id']) ? sanitize_text_field($atts['id']) : '';
-		$stripeStyle = isset($atts['stripe_style']) ? sanitize_text_field($atts['stripe_style']) : '';
+      $type = isset($atts['type']) ? sanitize_text_field($atts['type']) : '';
+      $series = isset($atts['series']) ? sanitize_text_field($atts['series']) : '';
+      $url = isset($atts['url']) ? esc_url($atts['url']) : '';
+      $audioStyle = isset($atts['audio_style']) ? sanitize_text_field($atts['audio_style']) : '';
+      $id = isset($atts['id']) ? sanitize_text_field($atts['id']) : '';
+      $stripeStyle = isset($atts['stripe_style']) ? sanitize_text_field($atts['stripe_style']) : '';
 
 	    $table_name = $wpdb->prefix . 'audio_list';
 		  $where_conditions = array('activeFlag = "Active"');
