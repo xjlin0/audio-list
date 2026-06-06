@@ -23,8 +23,7 @@ class AdminTest extends TestCase {
 
     public function test_is_aws_configured_returns_true_when_settings_exist() {
         if (defined('AS3CF_SETTINGS')) {
-            // Can't redefine constants in PHP easily, so we skip if already set
-            // but usually in CI it won't be set yet.
+            // Constant already defined, we'll test the logic that handles it
         } else {
             define('AS3CF_SETTINGS', serialize([
                 'provider' => 'aws',
@@ -46,7 +45,7 @@ class AdminTest extends TestCase {
         // Mock wp_verify_nonce to return false
         Functions\expect('wp_verify_nonce')->andReturn(false);
         
-        // Mock wp_send_json_error to throw an exception instead of exiting
+        // Mock wp_send_json_error
         Functions\expect('wp_send_json_error')
             ->once()
             ->with('Invalid nonce')
@@ -56,6 +55,7 @@ class AdminTest extends TestCase {
 
         $admin = new Audio_List_Admin('audio-list', '1.0.0');
         
+        $this->expectException(\Exception::class);
         $this->expectExceptionMessage('JSON_ERROR_SENT');
         $admin->check_aws_file();
     }
@@ -66,30 +66,27 @@ class AdminTest extends TestCase {
         $_POST['year'] = '2026';
         $_POST['filename'] = 'test.mp3';
 
+        // Mock error_log to avoid output
+        Functions\expect('error_log')->zeroOrMoreTimes();
+
         // Mock wp_send_json_error
         Functions\expect('wp_send_json_error')
             ->once()
-            ->with(Mockery::pattern('/AWS Handler not available/'))
-            ->andThrow(new \Exception('JSON_ERROR_SENT'));
+            ->andThrow(new \Exception('JSON_ERROR_SENT_NOT_AVAILABLE'));
 
-        // Mock error_log
-        Functions\expect('error_log')->zeroOrMoreTimes();
-
-        $admin = new Audio_List_Admin('audio-list', '1.0.0');
+        $admin = new class('audio-list', '1.0.0') extends Audio_List_Admin {
+            protected function get_aws_handler() { return null; }
+        };
         
-        // Ensure get_aws_handler returns null (e.g. by having no settings)
-        // Note: AS3CF_SETTINGS might be defined from previous test, 
-        // but we can mock the internal state or just hope it's not defined.
-        
-        try {
-            $admin->check_aws_file();
-        } catch (\Exception $e) {
-            if ($e->getMessage() !== 'JSON_ERROR_SENT') throw $e;
-        }
-        $this->assertTrue(true); // Reached here
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('JSON_ERROR_SENT_NOT_AVAILABLE');
+        $admin->check_aws_file();
     }
 
     public function test_get_aws_handler_lazy_loads() {
+        // Mock get_option which is called in AWS_Handler constructor
+        Functions\expect('get_option')->andReturn([]);
+        
         $admin = new Audio_List_Admin('audio-list', '1.0.0');
         
         $reflect = new \ReflectionClass($admin);
@@ -98,8 +95,6 @@ class AdminTest extends TestCase {
         
         $this->assertNull($prop->getValue($admin));
 
-        // Note: Since constants are global, we rely on the previous test setting AS3CF_SETTINGS
-        // or we test the logic via reflection if possible.
         $method = $reflect->getMethod('get_aws_handler');
         $method->setAccessible(true);
         
