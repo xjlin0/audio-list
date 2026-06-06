@@ -1,9 +1,9 @@
 # Plugin Name
-Contributors: Jack  
+Contributors: Dennis,　Jack, Jason
 Link: https://xjlin0.github.io/  
 Tags: audio, player  
 Requires at least: 6.5  
-Tested up to: 6.5.5  
+Tested up to: 7.0  
 Stable tag:  
 License: Apache-2.0 license  
 License URI: https://github.com/xjlin0/audio-list?tab=Apache-2.0-1-ov-file  
@@ -51,6 +51,9 @@ It's developed on PHP 8.2 and Wordpress 6.5.3~5 on MySQL 5.7, never tested in ot
 
 ## Changelog
 
+### 1.1
+* Add search, tests, youtube & handout preview and mp3 directly upload functions. Removed vendor files.
+
 ### 1.0
 * Initial implantation. No Bootstrap, no JQuery and No database password required.
 
@@ -90,3 +93,29 @@ php_value upload_max_filesize 500M
 php_value post_max_size 500M
 ```
 Then after `docker compose up`, please browse http://0.0.0.0:8888 
+
+## Developer Guide
+
+If you want to contribute to this plugin or run the automated tests, please follow these steps:
+
+### 1. Install Composer
+This project uses [Composer](https://getcomposer.org/) to manage dependencies. If you don't have it installed:
+- **Linux/macOS**: `curl -sS https://getcomposer.org/installer | php && sudo mv composer.phar /usr/local/bin/composer`
+- **Windows**: Download and run the [Composer-Setup.exe](https://getcomposer.org/Composer-Setup.exe).
+
+### 2. Install Development Dependencies
+The core production libraries are included in the repository for convenience, but development tools (like PHPUnit) are excluded to keep the repository lightweight. To install them, run:
+```bash
+composer install
+```
+
+### 3. Running Tests
+We use PHPUnit and Brain Monkey for unit testing. To run the test suite:
+```bash
+# On Linux/macOS
+php vendor/bin/phpunit
+
+# On Windows
+vendor\bin\phpunit
+```
+Any changes pushed to GitHub will automatically trigger these tests via GitHub Actions.

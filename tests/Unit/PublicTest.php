@@ -104,4 +104,46 @@ class PublicTest extends TestCase {
         $this->assertStringContainsString('handout-link', $output);
         $this->assertStringContainsString('youtube-item', $output);
     }
+
+    public function test_inject_audio_search_results() {
+        global $wpdb;
+        $wpdb = Mockery::mock('\stdClass');
+        $wpdb->prefix = 'wp_';
+
+        // Mock WP functions
+        Functions\expect('get_search_query')->andReturn('Jesus');
+        Functions\expect('site_url')->andReturn('https://example.com');
+        Functions\expect('current_time')->andReturn('2026-06-05 12:00:00');
+        Functions\expect('esc_url')->andReturnFirstArg();
+        Functions\expect('esc_html')->andReturnFirstArg();
+        Functions\expect('is_admin')->andReturn(false);
+
+        $query_mock = Mockery::mock('\WP_Query');
+        $query_mock->shouldReceive('is_main_query')->andReturn(true);
+        $query_mock->shouldReceive('is_search')->andReturn(true);
+
+        $mock_result = (object)[
+            'sermondate' => '2026-06-05',
+            'type' => 'Sermon',
+            'section' => 'John 3:16',
+            'series' => 'Gospel',
+            'audiofile' => '20260605.mp3',
+            'topic' => 'Salvation',
+            'speaker' => 'Pastor'
+        ];
+
+        $wpdb->shouldReceive('esc_like')->andReturn('Jesus');
+        $wpdb->shouldReceive('prepare')->andReturn('MOCKED SEARCH QUERY');
+        $wpdb->shouldReceive('get_results')->andReturn([$mock_result]);
+
+        $public = new Audio_List_Public('audio-list', '1.0.0');
+        $initial_posts = [ (object)['ID' => 10, 'post_title' => 'Real Post'] ];
+
+        $modified_posts = $public->inject_audio_search_results($initial_posts, $query_mock);
+
+        $this->assertCount(2, $modified_posts);
+        $this->assertEquals('📂 錄音搜尋結果：找到 1 筆相符資料', $modified_posts[0]->post_title);
+        $this->assertStringContainsString('Salvation', $modified_posts[0]->post_content);
+        $this->assertStringContainsString('/sermon-2026/#20260605', $modified_posts[0]->post_content);
+    }
 }
