@@ -12,6 +12,8 @@ class PublicTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         Monkey\setUp();
+        // Global WP mocks for shortcode-related tests
+        Functions\expect('add_shortcode')->zeroOrMoreTimes();
     }
 
     protected function tearDown(): void {
@@ -23,7 +25,7 @@ class PublicTest extends TestCase {
     public function test_youtube_url_detection() {
         $public = new Audio_List_Public('audio-list', '1.0.0');
         
-        $reflect = new \ReflectionClass($public);
+        $reflect = new \ReflectionClass(Audio_List_Public::class);
         $method = $reflect->getMethod('is_youtube_url');
         $method->setAccessible(true);
 
@@ -35,7 +37,7 @@ class PublicTest extends TestCase {
     public function test_get_youtube_id() {
         $public = new Audio_List_Public('audio-list', '1.0.0');
         
-        $reflect = new \ReflectionClass($public);
+        $reflect = new \ReflectionClass(Audio_List_Public::class);
         $method = $reflect->getMethod('get_youtube_id');
         $method->setAccessible(true);
 
@@ -53,6 +55,7 @@ class PublicTest extends TestCase {
         Functions\expect('shortcode_atts')->andReturnFirstArg();
         Functions\expect('sanitize_text_field')->andReturnFirstArg();
         Functions\expect('esc_url')->andReturnFirstArg();
+        Functions\expect('error_log')->zeroOrMoreTimes();
         
         $wpdb->shouldReceive('prepare')->andReturn('MOCKED QUERY');
         $wpdb->shouldReceive('get_results')->with('MOCKED QUERY')->andReturn([]);
