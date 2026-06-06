@@ -412,7 +412,7 @@ class Audio_List_Admin {
 							</tr>
 							<tr id="audio-preview" <?php echo esc_attr(isset($audio) ? '' : 'hidden'); ?>>
 								<td align="right">
-									<a href="<?php echo esc_attr($audio_preview . $sermon_year . ( $audiofile_value ? '/#' . substr($audiofile_value, 0, strrpos($audiofile_value, '.')) : '' )); ?>" target="_blank">
+									<a href="/<?php echo esc_attr($audio_preview . $sermon_year . ( $audiofile_value ? '/#' . substr($audiofile_value, 0, strrpos($audiofile_value, '.')) : '' )); ?>" target="_blank">
 							          試聽看 (Audio check):
 							        </a>
 							    </td>
