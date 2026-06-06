@@ -54,9 +54,10 @@ class Audio_List_Admin {
         }
 
         if (defined('AS3CF_SETTINGS') && !empty(AS3CF_SETTINGS)) {
-            $aws_settings = unserialize(AS3CF_SETTINGS);
+            $settings = AS3CF_SETTINGS;
+            $aws_settings = is_array($settings) ? $settings : unserialize($settings);
 
-            if (isset($aws_settings['provider'], $aws_settings['access-key-id'], $aws_settings['secret-access-key'])) {
+            if (isset($aws_settings['access-key-id'], $aws_settings['secret-access-key'])) {
                 $this->aws_handler = new AWS_Handler();
                 return $this->aws_handler;
             } else {
@@ -80,8 +81,9 @@ class Audio_List_Admin {
         }
 
         if (defined('AS3CF_SETTINGS') && !empty(AS3CF_SETTINGS)) {
-            $aws_settings = unserialize(AS3CF_SETTINGS);
-            return isset($aws_settings['provider'], $aws_settings['access-key-id'], $aws_settings['secret-access-key']);
+            $settings = AS3CF_SETTINGS;
+            $aws_settings = is_array($settings) ? $settings : unserialize($settings);
+            return isset($aws_settings['access-key-id'], $aws_settings['secret-access-key']);
         }
 
         return false;
@@ -657,43 +659,43 @@ class Audio_List_Admin {
     }
 
     public function check_aws_file() {
-        if (!wp_verify_nonce($_POST['nonce'], 'audio_upload_nonce')) {
-            wp_send_json_error('Invalid nonce');
-        }
-
-        $year = sanitize_text_field($_POST['year']);
-        $filename = urldecode(sanitize_text_field($_POST['filename']));
-
-        $handler = $this->get_aws_handler();
-        if (!$handler) {
-            wp_send_json_error('AWS Handler not available. Please set your S3 key in wp_config.php settings of AS3CF_SETTINGS');
-            return;
-        }
-
         try {
+            if (!wp_verify_nonce($_POST['nonce'], 'audio_upload_nonce')) {
+                wp_send_json_error('Invalid nonce');
+            }
+
+            $year = sanitize_text_field($_POST['year']);
+            $filename = sanitize_text_field($_POST['filename']);
+
+            $handler = $this->get_aws_handler();
+            if (!$handler) {
+                wp_send_json_error('AWS Handler not available. Please set your S3 key in wp_config.php settings of AS3CF_SETTINGS');
+                return;
+            }
+
             $exists = $handler->check_file_exists($year, $filename);
             wp_send_json_success(['exists' => $exists]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             wp_send_json_error($e->getMessage());
         }
     }
 
     public function upload_to_aws() {
-        if (!wp_verify_nonce($_POST['nonce'], 'audio_upload_nonce')) {
-            wp_send_json_error('Invalid nonce');
-        }
-
-        $handler = $this->get_aws_handler();
-        if (!$handler) {
-            wp_send_json_error('AWS Handler not available. Please set your S3 key in wp_config.php settings of AS3CF_SETTINGS');
-            return;
-        }
-
         try {
+            if (!wp_verify_nonce($_POST['nonce'], 'audio_upload_nonce')) {
+                wp_send_json_error('Invalid nonce');
+            }
+
+            $handler = $this->get_aws_handler();
+            if (!$handler) {
+                wp_send_json_error('AWS Handler not available. Please set your S3 key in wp_config.php settings of AS3CF_SETTINGS');
+                return;
+            }
+
             $year = sanitize_text_field($_POST['year']);
             $url = $handler->upload_file($year, $_FILES['file']);
             wp_send_json_success(['url' => $url]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             wp_send_json_error($e->getMessage());
         }
     }

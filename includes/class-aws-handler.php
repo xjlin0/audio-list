@@ -10,7 +10,8 @@ class AWS_Handler {
     private $bucket;
 
     public function __construct() {
-        $aws_settings = get_option('aws_settings') ?: unserialize(constant('AS3CF_SETTINGS'));
+        $settings = defined('AS3CF_SETTINGS') ? AS3CF_SETTINGS : null;
+        $aws_settings = get_option('aws_settings') ?: (is_array($settings) ? $settings : unserialize($settings));
         $this->bucket = 'chinese-church';
         
         $this->s3 = new S3Client([
