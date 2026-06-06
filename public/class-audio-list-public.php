@@ -52,6 +52,21 @@ class Audio_List_Public {
 		$this->version = $version;
     add_shortcode('audio-list', array($this, 'display_audio_list'));
     add_filter('the_posts', array($this, 'inject_audio_search_results'), 10, 2);
+    add_filter('get_the_excerpt', array($this, 'preserve_mock_post_excerpt'), 10, 2);
+	}
+
+	/**
+	 * Ensure our mock post excerpt keeps its HTML (links, list) even when themes strip tags.
+	 *
+	 * @param string $excerpt The post excerpt.
+	 * @param \WP_Post $post The post object.
+	 * @return string The modified excerpt.
+	 */
+	public function preserve_mock_post_excerpt($excerpt, $post) {
+		if ($post instanceof \WP_Post && $post->ID === -1628) {
+			return $post->post_content;
+		}
+		return $excerpt;
 	}
 
 	/**
@@ -145,7 +160,7 @@ class Audio_List_Public {
 		$mock_post->post_date_gmt = current_time('mysql', 1);
 		$mock_post->post_content = $content;
 		$mock_post->post_title = sprintf('📂 錄音搜尋結果：找到 %d 筆相符資料', count($results));
-		$mock_post->post_excerpt = '';
+		$mock_post->post_excerpt = $content;
 		$mock_post->post_status = 'publish';
 		$mock_post->comment_status = 'closed';
 		$mock_post->ping_status = 'closed';
