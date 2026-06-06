@@ -1,6 +1,11 @@
 # PHP / Composer
-# We INCLUDE vendor for "plug-and-play" but exclude unnecessary bloat
-!vendor/
+# Temporarily being more permissive to ensure all composer-added files are tracked
+vendor/
+!vendor/**/
+!vendor/**/*.php
+!vendor/**/*.json
+
+# Exclude obvious bloat while keeping code
 vendor/**/tests/
 vendor/**/test/
 vendor/**/Test/

@@ -70,8 +70,11 @@ class AwsHandlerTest extends TestCase {
         $s3Mock->shouldReceive('headObject')
             ->andReturn($resultMock);
 
+        // NoSuchKeyException is final, so we instantiate it instead of mocking it
+        $exception = new NoSuchKeyException('The specified key does not exist.');
+
         $resultMock->shouldReceive('resolve')
-            ->andThrow(Mockery::mock(NoSuchKeyException::class));
+            ->andThrow($exception);
 
         $handler = new class($s3Mock) extends AWS_Handler {
             public function __construct($s3) {
