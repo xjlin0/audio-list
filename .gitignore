@@ -1,11 +1,25 @@
 # PHP / Composer
-# Temporarily being more permissive to ensure all composer-added files are tracked
+# INCLUDE production vendor for "plug-and-play"
 vendor/
 !vendor/**/
 !vendor/**/*.php
 !vendor/**/*.json
 
-# Exclude obvious bloat while keeping code
+# EXCLUDE Development/Testing tools (Huge volume of files)
+vendor/phpunit/
+vendor/mockery/
+vendor/brain/
+vendor/hamcrest/
+vendor/myclabs/
+vendor/nikic/
+vendor/phar-io/
+vendor/sebastian/
+vendor/theseer/
+vendor/antecedent/
+vendor/staabm/
+vendor/bin/
+
+# Exclude obvious bloat within production packages
 vendor/**/tests/
 vendor/**/test/
 vendor/**/Test/
@@ -20,6 +34,7 @@ vendor/**/CONTRIBUTING*
 # PHP environment
 composer.phar
 .phpunit.result.cache
+patchwork.json
 
 # PhpStorm
 .idea
