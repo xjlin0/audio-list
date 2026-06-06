@@ -2,6 +2,7 @@
 
 use AsyncAws\S3\S3Client;
 use AsyncAws\S3\Enum\ObjectCannedACL;
+use AsyncAws\S3\Exception\NoSuchKeyException;
 use AsyncAws\Core\Exception\Exception as AsyncAwsException;
 
 class AWS_Handler {
@@ -22,10 +23,13 @@ class AWS_Handler {
     public function check_file_exists($year, $filename) {
         $key = "restructure_sermon/$year/$filename";
         try {
-            return $this->s3->hasObject([
+            $this->s3->headObject([
                 'Bucket' => $this->bucket,
                 'Key'    => $key,
-            ])->isSuccess();
+            ])->resolve();
+            return true;
+        } catch (NoSuchKeyException $e) {
+            return false;
         } catch (AsyncAwsException $e) {
             throw new Exception('AWS Error: ' . $e->getMessage());
         }
@@ -58,7 +62,8 @@ class AWS_Handler {
         }
 
         try {
-            $this->s3->putObject($uploadParams);
+            $result = $this->s3->putObject($uploadParams);
+            $result->resolve();
             // Construct the ObjectURL manually as putObject in AsyncAws doesn't return it directly in the same way
             return sprintf('https://%s.s3.%s.amazonaws.com/%s', $this->bucket, 'us-west-1', $key);
         } catch (AsyncAwsException $e) {
