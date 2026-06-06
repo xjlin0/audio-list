@@ -116,7 +116,7 @@ class Audio_List_Public {
 
 			$clean_filename = !empty($row->audiofile) ? substr($row->audiofile, 0, strrpos($row->audiofile, '.')) : '';
 			$url = $subfolder . '/sermon-' . $year . '/#' . $clean_filename;
-
+			
 			$display_title = sprintf(
 				'<strong>%s</strong> - %s - %s %s (%s)',
 				esc_html($date_val),
@@ -222,12 +222,12 @@ class Audio_List_Public {
 	    ), $atts);
 
 	    $sermondate = isset($atts['sermondate']) ? sanitize_text_field($atts['sermondate']) : '';
-		$type = isset($atts['type']) ? sanitize_text_field($atts['type']) : '';
-		$series = isset($atts['series']) ? sanitize_text_field($atts['series']) : '';
-		$url = isset($atts['url']) ? esc_url($atts['url']) : '';
-		$audioStyle = isset($atts['audio_style']) ? sanitize_text_field($atts['audio_style']) : '';
-		$id = isset($atts['id']) ? sanitize_text_field($atts['id']) : '';
-		$stripeStyle = isset($atts['stripe_style']) ? sanitize_text_field($atts['stripe_style']) : '';
+      $type = isset($atts['type']) ? sanitize_text_field($atts['type']) : '';
+      $series = isset($atts['series']) ? sanitize_text_field($atts['series']) : '';
+      $url = isset($atts['url']) ? esc_url($atts['url']) : '';
+      $audioStyle = isset($atts['audio_style']) ? sanitize_text_field($atts['audio_style']) : '';
+      $id = isset($atts['id']) ? sanitize_text_field($atts['id']) : '';
+      $stripeStyle = isset($atts['stripe_style']) ? sanitize_text_field($atts['stripe_style']) : '';
 
 	    $table_name = $wpdb->prefix . 'audio_list';
 		  $where_conditions = array('activeFlag = "Active"');
